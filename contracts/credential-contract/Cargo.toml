@@ -1,0 +1,17 @@
+[package]
+name = "credential-contract"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["lib", "cdylib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+issuer-registry = { path = "../issuer-registry" }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+issuer-registry = { path = "../issuer-registry" }
