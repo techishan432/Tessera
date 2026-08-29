@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+/* ── Light (default) ──────────────────────────────────────────────────────── */
+:root {
+  --background: #f6f6fa;
+  --foreground: #17161f;
+  --surface: #ffffff;
+  --surface-2: #eef0f6;
+  --line: #dcdde8;
+  --muted: #67647a;
+  --primary: #6a58e8;
+  --primary-soft: #6a58e81c;
+  --gold: #a87e24;
+  --gold-soft: #a87e241c;
+  --good: #178a56;
+  --bad: #d24545;
+  --on-gold: #fff8e8;
+  --overlay-soft: rgba(23, 22, 31, 0.04);
+  --overlay: rgba(23, 22, 31, 0.08);
+  --glass-top: rgba(255, 255, 255, 0.85);
+  --glass-bottom: rgba(255, 255, 255, 0.6);
+  --hero-fade-strong: rgba(246, 246, 250, 0.92);
+  --hero-fade-soft: rgba(246, 246, 250, 0.35);
+  --wall-bg: radial-gradient(ellipse at center, #ffffff 0%, #eef0f6 75%);
+}
+
+/* ── Dark (html.dark) ─────────────────────────────────────────────────────── */
+.dark {
+  --background: #08080f;
+  --foreground: #f4f3fa;
+  --surface: #0e0e18;
+  --surface-2: #14141f;
+  --line: #23232f;
+  --muted: #9b98ac;
+  --primary: #8b7cff;
+  --primary-soft: #8b7cff26;
+  --gold: #e6c474;
+  --gold-soft: #e6c47421;
+  --good: #3ecf8e;
+  --bad: #ff6b6b;
+  --on-gold: #1a1503;
+  --overlay-soft: rgba(255, 255, 255, 0.03);
+  --overlay: rgba(255, 255, 255, 0.06);
+  --glass-top: rgba(255, 255, 255, 0.05);
+  --glass-bottom: rgba(255, 255, 255, 0.02);
+  --hero-fade-strong: rgba(8, 8, 15, 0.92);
+  --hero-fade-soft: rgba(8, 8, 15, 0.35);
+  --wall-bg: radial-gradient(ellipse at center, #12121f 0%, #08080f 75%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
+  --color-overlay: var(--overlay);
+  --color-overlay-soft: var(--overlay-soft);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+::selection {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* thin, unobtrusive scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+/* glass panel used across marketing surfaces */
+.glass {
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
+  border: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+/* gold/violet hairline gradient used on credential cards */
+.credential-edge {
+  position: relative;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    linear-gradient(135deg, #e6c47455, #8b7cff33, #e6c47422) border-box;
+  border: 1px solid transparent;
+}
