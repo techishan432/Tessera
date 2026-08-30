@@ -379,7 +379,7 @@ The three demo members were sponsored with exactly the 1 XLM base reserve — **
 | :--- | :-: | :--- |
 | **Public GitHub Repo** | ✅ Pass | [techishan432/Tessera](https://github.com/techishan432/Tessera) |
 | **README & Complete Documentation** | ✅ Pass | Architecture, contract docs, verification log, setup & deployment guides (this file) |
-| **15+ Meaningful Commits** | ✅ Pass | **28 structured commits** on `main` |
+| **15+ Meaningful Commits** | ✅ Pass | **37 structured commits** on `main` |
 | **Live Production Demo** | ✅ Pass | [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app) |
 | **Contract Deployment Addresses** | ✅ Pass | Both contract IDs (see [deployment table](#-soroban-smart-contracts--deployment-details-stellar-testnet)) |
 | **Deployer Wallet Address** | ✅ Pass | [`GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS`](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) |
@@ -391,7 +391,7 @@ The three demo members were sponsored with exactly the 1 XLM base reserve — **
 | **CI/CD Pipeline Setup** | ⚠️ Partial | Local verification gates: `cargo test --workspace`, `npx vitest run`, `npm run build`; GitHub Actions workflow not yet configured |
 | **Contract Unit Tests** | ✅ Pass | **16/16** passing (`cargo test --workspace`) + 16/16 frontend pipeline tests (`vitest`) |
 
-> **Production Deployment Verification**: continuous delivery via Vercel at [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app). All 28 commits pushed to `main`.
+> **Production Deployment Verification**: continuous delivery via Vercel at [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app). All 37 commits pushed to `main`.
 
 - [x] **Soroban Smart Contract Implementation**: two custom Rust Soroban contracts (`contracts/credential-contract`, `contracts/issuer-registry`) enforcing soulbound non-transferability and org-gated issuance.
 - [x] **Stellar Testnet Deployment**: both contracts live on testnet (protocol 28), WASM hashes verified byte-identical to the repo build.
