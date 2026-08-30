@@ -57,6 +57,144 @@ flowchart LR
 - **Orchestration lives in the API routes** — the claim lifecycle (`pending → verified → approved → minted`), AI verification, IPFS pinning, sponsored account creation, and org-key signing.
 - **Wallet layer** — Freighter via stellar-wallet-kit for members who have a wallet, or a sponsored zero-XLM account for those who don't (see [onboarding](#-local-development-setup-localhost)).
 
+### User & actor diagram
+
+Who is involved, and what each of them does:
+
+```mermaid
+flowchart TB
+    subgraph People
+        M["👤 Member<br/>contribution holder"]
+        O["🧑‍💼 Organizer<br/>community staff"]
+    end
+
+    subgraph Orgs["Pilot organizations (testnet issuer keys)"]
+        O1["FIEM ACM"]
+        O2["GDG Groups"]
+        O3["HackSpire"]
+    end
+
+    E["🔎 Anyone / verifier<br/>(bio link, explorer)"]
+
+    M -->|"submits contribution + evidence links"| APP["Tessera app<br/>claim → AI verify → approve"]
+    M -->|"connects Freighter or gets a sponsored 1-XLM wallet"| WAL["Stellar wallet<br/>(G-address)"]
+    O -->|"reviews AI verdict · approves/rejects · triggers mint"| DASH["Organizer dashboard<br/>/dashboard"]
+    DASH --> APP
+    APP -->|"org key signs mint(issuer, to, cid)"| O1
+    APP -->|"org key signs mint(issuer, to, cid)"| O2
+    APP -->|"org key signs mint(issuer, to, cid)"| O3
+    O1 & O2 & O3 -.->|"each registered in issuer-registry"| CHAIN["Soroban testnet<br/>credential-contract + issuer-registry"]
+    WAL <-->|"credential stored against holder"| CHAIN
+    E -->|"reads the 3D credential wall"| PF["Public profile<br/>/profile/[wallet]"]
+    CHAIN -->|"get_credentials(holder)"| PF
+    E -->|"verifies tx hashes, WASM, state"| EXP["Stellar Expert explorer"]
+    CHAIN --> EXP
+```
+
+### Data flow diagram
+
+Where each piece of data is created, transformed, and stored:
+
+```mermaid
+flowchart LR
+    subgraph OffChain["Off-chain"]
+        CL["**Claim**<br/>type · description · event · date<br/>claimantWallet · issuerOrg · evidence[]"]
+        EV["**Evidence**<br/>GitHub PR · talk page · links"]
+        AV["**AI verifier**<br/>confidence 0–1 + citation<br/>(qwen · openai · anthropic · custom)"]
+        FS[("claims.json<br/>claims store (gitignored)")]
+        DASH2["**Organizer**<br/>/dashboard review"]
+        META["**Badge metadata JSON**<br/>standard · name · evidence · verification"]
+        IPFS["**IPFS / Pinata**<br/>pinned → CID"]
+    end
+
+    subgraph OnChain["On-chain (Soroban testnet)"]
+        REG["issuer-registry<br/>is_authorized_issuer(issuer)"]
+        CH["credential-contract<br/>mint(issuer, to, cid)"]
+    end
+
+    WAL2["Member wallet<br/>(sponsored, 1 XLM reserve)"]
+    PROF["3D credential wall · OG card<br/>landing stats (token_count)"]
+
+    EV -->|machine digest| AV
+    CL --> AV
+    AV -->|"confidence ≥ 0.8 → auto-approve"| FS
+    AV -->|"below threshold → manual review"| DASH2
+    DASH2 -->|approve| FS
+    FS -->|POST /api/mint| CH
+    CH -->|cross-contract authz check| REG
+    FS -->|pin metadata JSON| IPFS
+    IPFS -->|"only the CID goes on-chain"| CH
+    CH -->|"credential {id, holder, issuer, org, cid, issued_at}"| WAL2
+    CH -->|get_credentials · token_count| PROF
+    IPFS -.->|full metadata by CID| PROF
+```
+
+### Entity–relationship diagram
+
+The data model across the claims store (off-chain) and the two contracts (on-chain):
+
+```mermaid
+erDiagram
+    CLAIM ||--o| VERIFICATION : "carries"
+    CLAIM ||--o| CREDENTIAL : "mints (tokenId, txHash)"
+    CLAIM ||--o| METADATA : "pins (cid)"
+    CREDENTIAL ||--|| METADATA : "references (cid)"
+    CREDENTIAL }o--|| ISSUER_ORG : "issuer registered as"
+    CLAIM }o--|| ISSUER_ORG : "issuerOrg maps to"
+    CREDENTIAL }o--|| HOLDER : "belongs to"
+
+    CLAIM {
+        string id PK "claim_…"
+        string type "mentoring | talk | pr | other"
+        string description
+        string event
+        string date "YYYY-MM-DD"
+        string claimantWallet "G-address"
+        string issuerOrg "org display name"
+        string status "pending → verified → approved → minted"
+        string createdAt
+        string evidence "link/attachment URLs"
+    }
+    VERIFICATION {
+        boolean approved
+        float confidence "0..1"
+        string citation
+        string provider
+        string model
+        string checkedAt
+    }
+    CREDENTIAL {
+        uint32 id PK "tokenId (on-chain)"
+        string holder "G-address"
+        string issuer "org G-address"
+        string org_name
+        string cid "IPFS CID or local:<claimId>"
+        uint64 issued_at "ledger timestamp"
+    }
+    METADATA {
+        string standard "tessera-credential/1"
+        string name
+        string type
+        string description
+        string event
+        string date
+        string claimant
+        string org
+        array evidence
+        object verification
+    }
+    ISSUER_ORG {
+        string address PK "org G-address (registry)"
+        string org_name
+    }
+    HOLDER {
+        string address PK "member G-address"
+        uint32 credentials "1..n live credentials"
+    }
+```
+
+> **Trust split:** `CLAIM`, `VERIFICATION`, and `METADATA` live off-chain (mutable, human-readable). `CREDENTIAL` and `ISSUER_ORG` live on-chain (immutable, trustless). The only bridge is the **CID** — so the on-chain record stays tiny while the badge content stays rich and auditable.
+
 ### The credential lifecycle
 
 1. **Claim submitted** — a member (or the organizer on their behalf) submits a contribution with evidence links → `POST /api/claims`
@@ -95,9 +233,9 @@ The two contracts form the trust core: `credential-contract` mints soulbound cre
 | Parameter | Value / Address | Status |
 | :--- | :--- | :-: |
 | **Network** | **Stellar Testnet** (protocol 28) | 🟢 Live |
-| **`credential-contract` ID** | `CBU3BDDRG5Z6XOS5JID7FZBOQJE7PZCUUIYZGWTZGS3AGEUPU4RYTF64` | 🟢 Verified |
-| **`issuer-registry` ID** | `CD2MLVE5YNLFELC4FKV5NDYFJ3YRN6IQXEQXUNCXTIFZLUUTNFZCK7AH` | 🟢 Verified |
-| **Deployer / Admin Wallet** | `GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS` | 🟢 Active |
+| **`credential-contract` ID** | [`CBU3BDDRG5Z6XOS5JID7FZBOQJE7PZCUUIYZGWTZGS3AGEUPU4RYTF64`](https://stellar.expert/explorer/testnet/contract/CBU3BDDRG5Z6XOS5JID7FZBOQJE7PZCUUIYZGWTZGS3AGEUPU4RYTF64) | 🟢 Verified |
+| **`issuer-registry` ID** | [`CD2MLVE5YNLFELC4FKV5NDYFJ3YRN6IQXEQXUNCXTIFZLUUTNFZCK7AH`](https://stellar.expert/explorer/testnet/contract/CD2MLVE5YNLFELC4FKV5NDYFJ3YRN6IQXEQXUNCXTIFZLUUTNFZCK7AH) | 🟢 Verified |
+| **Deployer / Admin Wallet** | [`GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS`](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) | 🟢 Active |
 | **credential WASM sha256** | `ae43a75cf8c96cb98cb3449c68991ba75f97059ff8d16f98300971ae4214a86b` (18,848 B) | 🟢 Matches on-chain |
 | **registry WASM sha256** | `2f95a6563845f9911ebe031e0ef1a8a0f479c69f1f075e8e475e5393ad7f3f3e` (8,339 B) | 🟢 Matches on-chain |
 | **Credential Explorer** | [View credential-contract on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CBU3BDDRG5Z6XOS5JID7FZBOQJE7PZCUUIYZGWTZGS3AGEUPU4RYTF64) | 🔗 Explorer |
@@ -201,10 +339,10 @@ Testnet identities used for the live demo — balances as verified on 2026-08-30
 
 | Role | Address | Balance |
 | :--- | :--- | :--- |
-| **Operator / sponsor** (pays fees, creates + funds recipient accounts) | `GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS` | 9,989.84 XLM |
-| **FIEM ACM** issuer (signs FIEM mints) | `GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK` | 9,999.99 XLM |
-| **GDG Groups** issuer (signs GDG mints) | `GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV` | 9,999.99 XLM |
-| **HackSpire** issuer (signs HackSpire mints) | `GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K` | 9,999.99 XLM |
+| **Operator / sponsor** (pays fees, creates + funds recipient accounts) | [`GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS`](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) | 9,989.84 XLM |
+| **FIEM ACM** issuer (signs FIEM mints) | [`GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK`](https://stellar.expert/explorer/testnet/account/GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK) | 9,999.99 XLM |
+| **GDG Groups** issuer (signs GDG mints) | [`GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV`](https://stellar.expert/explorer/testnet/account/GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV) | 9,999.99 XLM |
+| **HackSpire** issuer (signs HackSpire mints) | [`GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K`](https://stellar.expert/explorer/testnet/account/GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K) | 9,999.99 XLM |
 | Demo member — mentoring credential (sponsored) | `GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY` | 1.0000000 XLM |
 | Demo member — PR credential (sponsored) | `GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5` | 1.0000000 XLM |
 | Demo member — talk credential (sponsored) | `GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3` | 1.0000000 XLM |
@@ -244,7 +382,7 @@ The three demo members were sponsored with exactly the 1 XLM base reserve — **
 | **15+ Meaningful Commits** | ✅ Pass | **28 structured commits** on `main` |
 | **Live Production Demo** | ✅ Pass | [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app) |
 | **Contract Deployment Addresses** | ✅ Pass | Both contract IDs (see [deployment table](#-soroban-smart-contracts--deployment-details-stellar-testnet)) |
-| **Deployer Wallet Address** | ✅ Pass | `GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS` |
+| **Deployer Wallet Address** | ✅ Pass | [`GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS`](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) |
 | **Proof of 10+ Wallet Interactions** | ✅ Pass | **10 verified testnet transactions** — 4 deployment/setup, 3 org-signed mints, 3 sponsored account creations (see [verification log](#-on-chain-verification-log--testnet-2026-08-29--2026-08-30)) + 2 live on-chain state reads |
 | **Analytics & Monitoring Setup** | ✅ Pass | Live on-chain stats via `/api/stats`, real-time profile reads, Horizon account sync |
 | **Basic User Feedback Summary** | ⚠️ WIP | [Feedback section](#-community-feedback) — add form link + responses |
