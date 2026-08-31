@@ -27,6 +27,11 @@ export function Hero({ demoWallet }: { demoWallet: string }) {
       <div className="absolute inset-0" aria-hidden>
         <HeroScene />
       </div>
+      {/* ambient glow behind the network (right-weighted) */}
+      <div
+        className="pointer-events-none absolute inset-y-0 right-0 w-2/3 bg-[radial-gradient(ellipse_at_center_right,var(--primary-soft),transparent_65%)]"
+        aria-hidden
+      />
       {/* legibility gradient */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,var(--hero-fade-strong)_35%,var(--hero-fade-soft)_75%)]" />
 
@@ -61,16 +66,38 @@ export function Hero({ demoWallet }: { demoWallet: string }) {
         <motion.div variants={item} className="mt-9 flex flex-wrap items-center gap-4">
           <Link
             href={`/profile/${demoWallet}`}
-            className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-7 font-medium tracking-tight text-white shadow-[0_0_36px_-8px_var(--primary)] transition-colors hover:bg-primary/85"
+            className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-7 font-medium tracking-tight text-white shadow-[0_0_36px_-8px_var(--primary)] transition-colors hover:bg-primary/85"
           >
             View a live profile
+            <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
           </Link>
           <Link
             href="/dashboard"
-            className="inline-flex h-12 items-center justify-center rounded-full border border-line px-7 font-medium tracking-tight text-foreground transition-colors hover:border-primary/60 hover:bg-primary-soft"
+            className="group inline-flex h-12 items-center justify-center gap-2 rounded-full border border-line px-7 font-medium tracking-tight text-foreground transition-colors hover:border-primary/60 hover:bg-primary-soft"
           >
             For organizers
+            <span aria-hidden className="text-muted transition-transform group-hover:translate-x-0.5">→</span>
           </Link>
+        </motion.div>
+
+        {/* trust chips */}
+        <motion.div
+          variants={item}
+          className="mt-8 flex flex-wrap items-center gap-2.5"
+        >
+          {[
+            ["3 pilot orgs", "FIEM ACM · GDG Groups · HackSpire"],
+            ["Soulbound", "non-transferable by contract"],
+            ["Micro fees", "0.00001 XLM · sub-second finality"],
+          ].map(([label, sub]) => (
+            <span
+              key={label}
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-overlay-soft px-3.5 py-1.5 text-xs text-muted"
+            >
+              <span className="font-medium text-foreground">{label}</span>
+              <span className="text-muted/80">{sub}</span>
+            </span>
+          ))}
         </motion.div>
       </motion.div>
 
