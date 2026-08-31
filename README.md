@@ -357,6 +357,95 @@ The three demo members were sponsored with exactly the 1 XLM base reserve — **
 
 ---
 
+## 🏛️ Organizations, Users & Claims
+
+The dashboard (`/dashboard`) has two tabs — **Claims** (the full queue with status + organization filters) and **Issuers** (the orgs registered on-chain in `issuer-registry`). Claims are always filed **under an organization**, and it is the org's registered issuer wallet that signs each mint on-chain. The live demo's complete org → user → claim → credential mapping is below, with the wallet IDs the app remembers for each identity.
+
+### 🔐 How login works
+
+**Members (users) — the wallet *is* the login.** No email, no password:
+
+| Path | Flow |
+| :--- | :--- |
+| **A — existing wallet** | `/onboard` → **Connect Freighter** (stellar-wallet-kit) → one extension approval → the wallet address becomes the member's identity for claims and their profile |
+| **B — no wallet yet** | `/onboard` → **Sponsored account** → the server generates a fresh keypair and funds it with the 1 XLM reserve → the one-time secret key is shown → the member imports it into Freighter |
+
+From then on, `claimantWallet` on every claim is the member's G-address, and their credential wall lives at `/profile/<wallet-id>`. The address **is** the username.
+
+**Organizers — a shared app key (testnet-POC grade).**
+
+| Step | What happens |
+| :--- | :--- |
+| 1 | Open `/dashboard` → paste the shared `ORGANIZER_API_KEY` once |
+| 2 | It is stored in the browser (`localStorage["tessera.organizerKey"]`) — remembered on every later visit |
+| 3 | Sent as the `x-organizer-key` header on mutating calls: verify, approve/reject, mint, create-claim |
+| 4 | The on-chain mint is signed by the **organization's issuer key** (server-side, from `ORG_ISSUER_KEYS`) — the organizer key authorizes the *app action*; the org wallet signs the *chain* |
+
+> POC-grade by design: a single shared organizer key is fine for one organizer on testnet; swap for wallet-signed sessions before public exposure.
+
+### 🏛️ Organizations & their claims
+
+**FIEM ACM** — issuer wallet [`GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK`](https://stellar.expert/explorer/testnet/account/GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK)
+
+| Claim | Detail |
+| :--- | :--- |
+| Description | Delivered “Intro to Stellar” talk at FIEM ACM meetup |
+| Type · Event · Date | `talk` · FIEM ACM Monthly Meetup · 2026-01-25 |
+| Evidence | [Meetup event page](https://www.meetup.com/fiemacm/events/) |
+| Filed by (user) | Speaker member — [`GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3`](https://tessera-beta-five.vercel.app/profile/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) |
+| AI verdict | approved · confidence 0.80 · qwen3-32b |
+| Credential | token **#6** · [mint tx](https://stellar.expert/explorer/testnet/tx/eb00382c0c76d6f5cda088a9cc450958b1fe21bf2745b8889b20950c2f2d43f0) |
+
+**GDG Groups** — issuer wallet [`GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV`](https://stellar.expert/explorer/testnet/account/GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV)
+
+| Claim | Detail |
+| :--- | :--- |
+| Description | Merged 12 PRs into GDG developer portal |
+| Type · Event · Date | `pr` · GDG Open Source Program · 2026-03-05 |
+| Evidence | [GitHub PR list](https://github.com/gdg-dev/portal/pulls?q=is%3Apr+author%3Ademo-dev+is%3Aclosed) |
+| Filed by (user) | Open-source member — [`GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5`](https://tessera-beta-five.vercel.app/profile/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) |
+| AI verdict | approved · confidence 0.90 · qwen3-32b |
+| Credential | token **#5** · [mint tx](https://stellar.expert/explorer/testnet/tx/d139e6a61596911260464d06ca5679ec8bbec7a3bce8c375a23abfd14e9d93b7) |
+
+**HackSpire** — issuer wallet [`GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K`](https://stellar.expert/explorer/testnet/account/GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K)
+
+| Claim | Detail |
+| :--- | :--- |
+| Description | Mentored 4 teams at HackSpire Bootcamp 2026 |
+| Type · Event · Date | `mentoring` · HackSpire Bootcamp · 2026-06-18 |
+| Evidence | [HackSpire mentor board](https://www.hackspire.io/mentors) |
+| Filed by (user) | Mentoring member — [`GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY`](https://tessera-beta-five.vercel.app/profile/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) |
+| AI verdict | approved · confidence 0.85 · qwen3-32b |
+| Credential | token **#4** · [mint tx](https://stellar.expert/explorer/testnet/tx/34b339b1eeae2d656b3eadc014c0ad2c1c17a72f839a44058879cb22f30b5eba) |
+
+### 👤 Users (members) & their claims
+
+| User identity | Wallet ID | Claim (under org) | Credential |
+| :--- | :--- | :--- | :--- |
+| Mentoring member (HackSpire bootcamp) | [`GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY`](https://stellar.expert/explorer/testnet/account/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) | “Mentored 4 teams at HackSpire Bootcamp 2026” — HackSpire | [token #4](https://tessera-beta-five.vercel.app/profile/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) |
+| Open-source member (GDG portal) | [`GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5`](https://stellar.expert/explorer/testnet/account/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) | “Merged 12 PRs into GDG developer portal” — GDG Groups | [token #5](https://tessera-beta-five.vercel.app/profile/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) |
+| Speaker member (FIEM meetup) | [`GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3`](https://stellar.expert/explorer/testnet/account/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) | “Delivered ‘Intro to Stellar’ talk at FIEM ACM meetup” — FIEM ACM | [token #6](https://tessera-beta-five.vercel.app/profile/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) |
+
+> Demo members use role-based identities — on Tessera the wallet address *is* the identity, so no personal names or PII are stored.
+
+### 💾 Remembered wallet IDs — identity map
+
+Every identity in the demo, the wallet ID it signs with, and what that wallet is remembered for:
+
+| Name / identity | Role | Wallet ID | Remembered for |
+| :--- | :--- | :--- | :--- |
+| Platform operator | Deployer + sponsor | [`GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS`](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) | Contract deployment, fee payment, creating + funding sponsored accounts |
+| FIEM ACM | Organization (issuer) | [`GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK`](https://stellar.expert/explorer/testnet/account/GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK) | Signs FIEM ACM claim mints on-chain |
+| GDG Groups | Organization (issuer) | [`GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV`](https://stellar.expert/explorer/testnet/account/GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV) | Signs GDG Groups claim mints on-chain |
+| HackSpire | Organization (issuer) | [`GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K`](https://stellar.expert/explorer/testnet/account/GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K) | Signs HackSpire claim mints on-chain |
+| Mentoring member | User | `GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY` | Credential #4 holder · [profile](https://tessera-beta-five.vercel.app/profile/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) |
+| Open-source member | User | `GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5` | Credential #5 holder · [profile](https://tessera-beta-five.vercel.app/profile/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) |
+| Speaker member | User | `GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3` | Credential #6 holder · [profile](https://tessera-beta-five.vercel.app/profile/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) |
+
+Plus browser-side memory: the organizer key persists in `localStorage["tessera.organizerKey"]`, and a member's identity persists as their connected wallet address — no server-side sessions.
+
+---
+
 ## 💬 Community Feedback
 
 <!-- TODO: add your feedback form link (e.g. Google Form) below, then replace the
