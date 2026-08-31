@@ -32,7 +32,9 @@ export async function POST(req: Request) {
   try {
     const result = await verifyClaim(input, claim.evidence);
     claim.verification = result;
-    claim.status = "verified";
+    // Auto-approve at/above the configured threshold; below it the claim is
+    // flagged for manual organizer review.
+    claim.status = result.approved ? "approved" : "verified";
     await putClaim(claim);
     return NextResponse.json({ claim, verification: result });
   } catch (e) {

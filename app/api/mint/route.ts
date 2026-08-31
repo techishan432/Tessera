@@ -30,9 +30,10 @@ export async function POST(req: Request) {
 
   const claim = await getClaim(claimId);
   if (!claim) return NextResponse.json({ error: "claim not found" }, { status: 404 });
-  if (claim.status !== "approved") {
+  // "failed" is accepted so the organizer can retry after a mint error.
+  if (claim.status !== "approved" && claim.status !== "failed") {
     return NextResponse.json(
-      { error: `claim must be approved before minting (status: ${claim.status})` },
+      { error: `claim must be approved (or a failed retry) before minting (status: ${claim.status})` },
       { status: 409 }
     );
   }
