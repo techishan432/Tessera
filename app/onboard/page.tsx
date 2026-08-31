@@ -141,10 +141,21 @@ export default function OnboardPage() {
     }
   }, []);
 
-  // Load the registered organizations once on mount.
+  // Load the registered organizations once on mount (local IIFE keeps the
+  // effect body free of direct setState).
   useEffect(() => {
-    loadIssuers();
-  }, [loadIssuers]);
+    (async () => {
+      try {
+        const r = await fetch("/api/issuers");
+        const d = await r.json();
+        if (!r.ok) throw new Error();
+        setIssuers(d.issuers ?? []);
+        setIssuersError(false);
+      } catch {
+        setIssuersError(true);
+      }
+    })();
+  }, []);
 
   // While tracking the submitted claim, poll for lifecycle changes.
   const trackingClaimId = myClaim?.id;
