@@ -12,8 +12,8 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contractclient, contractimpl, contracttype, symbol_short, Address, Env, String,
-    Symbol, Vec,
+    contract, contractclient, contractevent, contractimpl, contracttype, symbol_short, Address,
+    Env, String, Symbol, Vec,
 };
 
 const ADMIN_KEY: Symbol = symbol_short!("admin");
@@ -21,6 +21,7 @@ const REGISTRY_KEY: Symbol = symbol_short!("registry");
 const COUNTER_KEY: Symbol = symbol_short!("counter");
 const TOKEN_KEY: Symbol = symbol_short!("tok");
 const INDEX_KEY: Symbol = symbol_short!("idx");
+const ISSUER_IDX_KEY: Symbol = symbol_short!("iidx");
 
 /// The subset of the issuer-registry interface this contract calls.
 /// `#[contractclient]` generates `RegistryClient` for cross-contract calls.
@@ -50,6 +51,24 @@ fn token_key(id: u32) -> (Symbol, u32) {
 
 fn index_key(holder: &Address) -> (Symbol, Address) {
     (INDEX_KEY, holder.clone())
+}
+
+/// Emitted on every mint. Topics: `["mint", issuer, to]`, data: token id.
+#[contractevent(topics = ["mint"])]
+pub struct MintEvent {
+    #[topic]
+    pub issuer: Address,
+    #[topic]
+    pub to: Address,
+    pub id: u32,
+}
+
+/// Emitted on every burn. Topics: `["burn", token_id]`, data: who authorized.
+#[contractevent(topics = ["burn"])]
+pub struct BurnEvent {
+    #[topic]
+    pub token_id: u32,
+    pub authorized_by: Address,
 }
 
 #[contract]
@@ -125,6 +144,24 @@ impl CredentialContract {
         ids.push_back(id);
         env.storage().instance().set(&idx_key, &ids);
 
+        // Per-issuer index (org dashboards: "what has this org issued?").
+        let issuer_idx_key = (ISSUER_IDX_KEY, issuer.clone());
+        let mut issued: Vec<u32> = env
+            .storage()
+            .instance()
+            .get(&issuer_idx_key)
+            .unwrap_or_else(|| Vec::new(&env));
+        issued.push_back(id);
+        env.storage().instance().set(&issuer_idx_key, &issued);
+
+        // Observability: visible in Stellar Expert, consumable by listeners.
+        MintEvent {
+            issuer: issuer.clone(),
+            to: to.clone(),
+            id,
+        }
+        .publish(&env);
+
         id
     }
 
@@ -166,6 +203,25 @@ impl CredentialContract {
             ids.remove(pos);
         }
         env.storage().instance().set(&idx_key, &ids);
+
+        // Per-issuer index: forget the burned credential.
+        let issuer_idx_key = (ISSUER_IDX_KEY, token.issuer.clone());
+        let mut issued: Vec<u32> = env
+            .storage()
+            .instance()
+            .get(&issuer_idx_key)
+            .unwrap_or_else(|| Vec::new(&env));
+        if let Some(pos) = issued.first_index_of(token_id) {
+            issued.remove(pos);
+        }
+        env.storage().instance().set(&issuer_idx_key, &issued);
+
+        // Observability: topics carry the token id, data who authorized.
+        BurnEvent {
+            token_id,
+            authorized_by: authorized_by.clone(),
+        }
+        .publish(&env);
     }
 
     /// All live (non-burned) credentials for `holder`, oldest first.
@@ -197,6 +253,23 @@ impl CredentialContract {
     /// burned). Powers the landing-page stat.
     pub fn token_count(env: Env) -> u32 {
         env.storage().instance().get(&COUNTER_KEY).unwrap_or(0)
+    }
+
+    /// Public read: live (non-burned) credentials minted by `issuer`, oldest
+    /// first. Powers org dashboards ("what has this org issued?").
+    pub fn get_issuer_credential_ids(env: Env, issuer: Address) -> Vec<u32> {
+        let ids: Vec<u32> = env
+            .storage()
+            .instance()
+            .get(&(ISSUER_IDX_KEY, issuer))
+            .unwrap_or_else(|| Vec::new(&env));
+        let mut out = Vec::new(&env);
+        for id in ids.iter() {
+            if env.storage().instance().has(&token_key(id)) {
+                out.push_back(id);
+            }
+        }
+        out
     }
 
     fn next_id(env: &Env) -> u32 {

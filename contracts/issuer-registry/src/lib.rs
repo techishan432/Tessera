@@ -8,12 +8,32 @@
 
 #![no_std]
 
-use soroban_sdk::{contract, contractimpl, symbol_short, Address, Env, String, Symbol, Vec};
+use soroban_sdk::{
+    contract, contractevent, contractimpl, symbol_short, Address, Env, String, Symbol, Vec,
+};
 
 const ADMIN_KEY: Symbol = symbol_short!("admin");
 const ISSUERS_KEY: Symbol = symbol_short!("issuers");
 
 type IssuerMap = soroban_sdk::Map<Address, String>;
+
+/// Emitted when an org is registered. Topics: `["add_issuer", issuer]`,
+/// data: org name.
+#[contractevent(topics = ["add_issuer"])]
+pub struct AddIssuerEvent {
+    #[topic]
+    pub issuer: Address,
+    pub org_name: String,
+}
+
+/// Emitted when an org is revoked. Topics: `["remove_issuer", issuer]`,
+/// data: the admin who performed the revocation.
+#[contractevent(topics = ["remove_issuer"])]
+pub struct RemoveIssuerEvent {
+    #[topic]
+    pub issuer: Address,
+    pub admin: Address,
+}
 
 #[contract]
 pub struct IssuerRegistry;
@@ -39,8 +59,15 @@ impl IssuerRegistry {
     pub fn add_issuer(env: Env, admin: Address, issuer: Address, org_name: String) {
         Self::require_admin(&env, &admin);
         let mut issuers = Self::load(&env);
-        issuers.set(issuer, org_name);
+        issuers.set(issuer.clone(), org_name.clone());
         env.storage().instance().set(&ISSUERS_KEY, &issuers);
+
+        // Observability: visible in Stellar Expert, consumable by listeners.
+        AddIssuerEvent {
+            issuer: issuer.clone(),
+            org_name: org_name.clone(),
+        }
+        .publish(&env);
     }
 
     /// Admin-gated: revoke an issuer. Credentials it already minted remain
@@ -51,8 +78,15 @@ impl IssuerRegistry {
         if !issuers.contains_key(issuer.clone()) {
             panic!("issuer not found");
         }
-        issuers.remove(issuer);
+        issuers.remove(issuer.clone());
         env.storage().instance().set(&ISSUERS_KEY, &issuers);
+
+        // Observability: data carries who performed the revocation.
+        RemoveIssuerEvent {
+            issuer: issuer.clone(),
+            admin,
+        }
+        .publish(&env);
     }
 
     /// Public read — called by the credential contract to gate `mint`, and by

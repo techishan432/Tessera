@@ -4,8 +4,9 @@
 use credential_contract::{CredentialContract, CredentialContractClient};
 use issuer_registry::{IssuerRegistry, IssuerRegistryClient};
 use soroban_sdk::{
-    testutils::{Address as _, Ledger as _},
-    Address, Env, String,
+    testutils::{Address as _, Events as _, Ledger as _},
+    xdr::{ContractEventBody, ScMap, ScMapEntry, ScVal},
+    Address, Env, String, Symbol,
 };
 
 /// Returns (env, admin, registry, credential, authorized_org).
@@ -224,4 +225,113 @@ fn set_registry_is_admin_gated() {
 
     assert!(client.try_set_registry(&evil, &new_registry).is_err());
     client.set_registry(&admin, &new_registry);
+}
+
+/// Events emitted by this contract only (registry events are filtered out).
+fn credential_events(env: &Env, credential: &Address) -> Vec<soroban_sdk::xdr::ContractEvent> {
+    env.events()
+        .all()
+        .filter_by_contract(credential)
+        .events()
+        .to_vec()
+}
+
+/// The V0 body of a contract event (topics + data).
+fn v0(event: &soroban_sdk::xdr::ContractEvent) -> &soroban_sdk::xdr::ContractEventV0 {
+    match &event.body {
+        ContractEventBody::V0(v0) => v0,
+    }
+}
+
+/// Build the expected event data: a map of the event's non-topic fields.
+fn data_map(env: &Env, entries: &[(&str, ScVal)]) -> ScVal {
+    let sc_entries: Vec<ScMapEntry> = entries
+        .iter()
+        .map(|(k, v)| ScMapEntry {
+            key: ScVal::from(Symbol::new(env, k)),
+            val: v.clone(),
+        })
+        .collect();
+    ScVal::Map(Some(ScMap(sc_entries.try_into().unwrap())))
+}
+
+#[test]
+fn mint_emits_event() {
+    let (env, _admin, _registry, credential, org) = setup();
+    let client = CredentialContractClient::new(&env, &credential);
+    let holder = Address::generate(&env);
+
+    let id = client.mint(&org, &holder, &cid(&env, "local:c1"));
+
+    let events = credential_events(&env, &credential);
+    assert_eq!(events.len(), 1);
+    let v0 = v0(events.first().unwrap());
+    assert_eq!(v0.topics.len(), 3);
+    let expected_name = ScVal::from(Symbol::new(&env, "mint"));
+    assert_eq!(v0.topics.first().unwrap(), &expected_name);
+    let expected_issuer = ScVal::from(org);
+    assert_eq!(v0.topics.get(1).unwrap(), &expected_issuer);
+    let expected_holder = ScVal::from(holder);
+    assert_eq!(v0.topics.get(2).unwrap(), &expected_holder);
+    assert_eq!(v0.data, data_map(&env, &[("id", ScVal::U32(id))]));
+}
+
+#[test]
+fn burn_emits_event() {
+    let (env, _admin, _registry, credential, org) = setup();
+    let client = CredentialContractClient::new(&env, &credential);
+    let holder = Address::generate(&env);
+
+    let id = client.mint(&org, &holder, &cid(&env, "local:c1"));
+    client.burn(&holder, &id);
+
+    // The test host keeps events per top-level call, so pick the burn event
+    // by its name topic rather than by index.
+    let burn_events: Vec<_> = credential_events(&env, &credential)
+        .into_iter()
+        .filter(|e| {
+            let b = v0(e);
+            b.topics.first() == Some(&ScVal::from(Symbol::new(&env, "burn")))
+        })
+        .collect();
+    assert_eq!(burn_events.len(), 1);
+    let v0 = v0(burn_events.first().unwrap());
+    assert_eq!(v0.topics.len(), 2);
+    let expected_name = ScVal::from(Symbol::new(&env, "burn"));
+    assert_eq!(v0.topics.first().unwrap(), &expected_name);
+    assert_eq!(v0.topics.get(1).unwrap(), &ScVal::U32(id));
+    let expected_holder = ScVal::from(holder);
+    assert_eq!(
+        v0.data,
+        data_map(&env, &[("authorized_by", expected_holder.clone())])
+    );
+}
+
+#[test]
+fn get_issuer_credential_ids_tracks_mints_and_burns() {
+    let (env, _admin, _registry, credential, org) = setup();
+    let client = CredentialContractClient::new(&env, &credential);
+    let holder = Address::generate(&env);
+    let other = Address::generate(&env);
+
+    let id1 = client.mint(&org, &holder, &cid(&env, "cid-1"));
+    let id2 = client.mint(&org, &other, &cid(&env, "cid-2"));
+
+    assert_eq!(
+        client.get_issuer_credential_ids(&org),
+        soroban_sdk::vec![&env, id1, id2]
+    );
+
+    // Burning removes the credential from the issuer's index too.
+    client.burn(&holder, &id1);
+    assert_eq!(
+        client.get_issuer_credential_ids(&org),
+        soroban_sdk::vec![&env, id2]
+    );
+
+    // An unrelated address issued nothing.
+    assert_eq!(
+        client.get_issuer_credential_ids(&Address::generate(&env)),
+        soroban_sdk::Vec::new(&env)
+    );
 }

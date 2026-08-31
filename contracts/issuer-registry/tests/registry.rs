@@ -3,7 +3,8 @@
 
 use issuer_registry::{IssuerRegistry, IssuerRegistryClient};
 use soroban_sdk::{
-    testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation},
+    testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation, Events as _},
+    xdr::{ContractEventBody, ScMap, ScMapEntry, ScVal},
     Address, Env, IntoVal, String, Symbol,
 };
 
@@ -107,4 +108,77 @@ fn only_admin_can_remove_issuer() {
     let result = client.try_remove_issuer(&evil, &issuer);
 
     assert!(result.is_err());
+}
+
+/// The V0 body of a contract event (topics + data).
+fn v0(event: &soroban_sdk::xdr::ContractEvent) -> &soroban_sdk::xdr::ContractEventV0 {
+    match &event.body {
+        ContractEventBody::V0(v0) => v0,
+    }
+}
+
+/// Build the expected event data: a map of the event's non-topic fields.
+fn data_map(env: &Env, entries: &[(&str, ScVal)]) -> ScVal {
+    let sc_entries: Vec<ScMapEntry> = entries
+        .iter()
+        .map(|(k, v)| ScMapEntry {
+            key: ScVal::from(Symbol::new(env, k)),
+            val: v.clone(),
+        })
+        .collect();
+    ScVal::Map(Some(ScMap(sc_entries.try_into().unwrap())))
+}
+
+#[test]
+fn add_issuer_emits_event() {
+    let (env, admin, registry) = deploy();
+    let client = IssuerRegistryClient::new(&env, &registry);
+    let issuer = Address::generate(&env);
+    let org = String::from_str(&env, "GDG Groups");
+
+    client.add_issuer(&admin, &issuer, &org);
+
+    let all = env.events().all().filter_by_contract(&registry);
+    let events = all.events();
+    assert_eq!(events.len(), 1);
+    let v0 = v0(events.first().unwrap());
+    assert_eq!(v0.topics.len(), 2);
+    let expected_name = ScVal::from(Symbol::new(&env, "add_issuer"));
+    assert_eq!(v0.topics.first().unwrap(), &expected_name);
+    let expected_issuer = ScVal::from(issuer);
+    assert_eq!(v0.topics.get(1).unwrap(), &expected_issuer);
+    let expected_org = ScVal::String("GDG Groups".as_bytes().to_vec().try_into().unwrap());
+    assert_eq!(v0.data, data_map(&env, &[("org_name", expected_org)]));
+}
+
+#[test]
+fn remove_issuer_emits_event() {
+    let (env, admin, registry) = deploy();
+    let client = IssuerRegistryClient::new(&env, &registry);
+    let issuer = Address::generate(&env);
+
+    client.add_issuer(&admin, &issuer, &String::from_str(&env, "FIEM ACM"));
+    client.remove_issuer(&admin, &issuer);
+
+    // The test host keeps events per top-level call, so pick the
+    // remove_issuer event by its name topic rather than by index.
+    let all = env.events().all().filter_by_contract(&registry);
+    let remove_events: Vec<_> = all
+        .events()
+        .iter()
+        .filter(|e| {
+            let b = v0(e);
+            b.topics.first() == Some(&ScVal::from(Symbol::new(&env, "remove_issuer")))
+        })
+        .collect();
+    assert_eq!(remove_events.len(), 1);
+    let v0 = v0(remove_events.first().unwrap());
+    assert_eq!(v0.topics.len(), 2);
+    let expected_name = ScVal::from(Symbol::new(&env, "remove_issuer"));
+    assert_eq!(v0.topics.first().unwrap(), &expected_name);
+    let expected_issuer = ScVal::from(issuer);
+    assert_eq!(v0.topics.get(1).unwrap(), &expected_issuer);
+    // Data carries who performed the revocation.
+    let expected_admin = ScVal::from(admin);
+    assert_eq!(v0.data, data_map(&env, &[("admin", expected_admin)]));
 }
