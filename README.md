@@ -1,5 +1,7 @@
 # Tessera — ProofOfContribution
 
+[![CI/CD Pipeline](https://github.com/techishan432/Tessera/actions/workflows/ci.yml/badge.svg)](https://github.com/techishan432/Tessera/actions/workflows/ci.yml)
+
 > **"Your contribution, proven on-chain. Soulbound. Verifiable by anyone."**
 
 Tessera mints **non-transferable (soulbound) credentials** on Stellar's **Soroban** smart-contract platform for the work that never lands on a résumé: mentoring at a hackathon, a merged open-source PR, the talk you actually gave. Authorized community organizations issue them; they land in a member's Stellar wallet as a portable, verifiable Web3 résumé — a public 3D "credential wall" you can drop a link to in your bio.
@@ -521,8 +523,8 @@ Community feedback from pilot hackathons and student chapters is continuously ga
 | **Basic User Feedback Summary** | ✅ Pass | [Feedback Form](https://forms.gle/nQZzh1WRdAEv4w4P7) & [Responses Spreadsheet](https://docs.google.com/spreadsheets/d/19i_vOCdaQH4UvvlUFD0WGFuBs-LOOpo_v5OxfBH_mzI/edit?gid=656352860#gid=656352860) (see [Feedback section](#-community-feedback)) |
 | **Demo Video Link (1–2 mins)** | ✅ Pass | [https://youtu.be/gB-rpFftlVU](https://youtu.be/gB-rpFftlVU) (see [Demo Video section](#-demo-video)) |
 | **Mobile Responsive UI Showcase** | ✅ Pass | Responsive layouts + 2D credential-wall fallback for mobile / `prefers-reduced-motion` (see [UI Showcase](#-platform-ui-showcase)) |
-| **CI/CD Pipeline Setup** | ⚠️ Partial | Local verification gates: `cargo test --workspace`, `npx vitest run`, `npm run build`; GitHub Actions workflow not yet configured |
-| **Contract Unit Tests** | ✅ Pass | **16/16** passing (`cargo test --workspace`) + 16/16 frontend pipeline tests (`vitest`) |
+| **CI/CD Pipeline Setup** | ✅ Pass | Automated GitHub Actions workflow ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) testing 16 Rust Soroban contract tests + 25 Vitest test cases + production Next.js build |
+| **Contract & Full-Stack Unit Tests** | ✅ Pass | **41/41** passing — **16/16** Rust contract tests (`cargo test --workspace`) + **25/25** full-stack tests (`vitest run`) |
 
 > **Production Deployment Verification**: continuous delivery via Vercel at [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app). All 37 commits pushed to `main`.
 

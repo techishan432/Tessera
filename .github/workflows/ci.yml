@@ -1,0 +1,65 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: Soroban Smart Contracts (16 Tests)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: contracts -> target
+
+      - name: Run Cargo Check
+        working-directory: contracts
+        run: cargo check --workspace
+
+      - name: Run Cargo Contract Tests
+        working-directory: contracts
+        run: cargo test --workspace -- --nocapture
+
+  frontend-and-api:
+    name: Full-Stack Next.js & Vitest Suite (25 Tests)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript & Unit Tests
+        run: npm test
+
+      - name: Run Next.js Production Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_STELLAR_NETWORK: TESTNET
+          STELLAR_NETWORK_PASSPHRASE: "Test SDF Network ; September 2015"
+          SOROBAN_RPC_URL: "https://soroban-testnet.stellar.org"
+          CREDENTIAL_CONTRACT_ID: "CBU3BDDRG5Z6XOS5JID7FZBOQJE7PZCUUIYZGWTZGS3AGEUPU4RYTF64"
+          ISSUER_REGISTRY_CONTRACT_ID: "CD2MLVE5YNLFELC4FKV5NDYFJ3YRN6IQXEQXUNCXTIFZLUUTNFZCK7AH"
