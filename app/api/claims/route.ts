@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClaim, listClaims, type ClaimStatus, type StoredClaim } from "@/lib/store";
+import { bootstrapDemoClaims } from "@/lib/demo-claims";
 import type { ClaimType, Evidence } from "@/lib/ai-verify";
 
 export const dynamic = "force-dynamic";
@@ -63,6 +64,7 @@ interface NewClaimInput {
 
 /** List claims (optionally ?status=). */
 export async function GET(req: Request) {
+  await bootstrapDemoClaims();
   const status = new URL(req.url).searchParams.get("status") as ClaimStatus | null;
   const claims = await listClaims(status ?? undefined);
   return NextResponse.json({ claims });

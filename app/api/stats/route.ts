@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { listClaims } from "@/lib/store";
+import { bootstrapDemoClaims } from "@/lib/demo-claims";
 import { readIssuers, readTokenCount } from "@/lib/stellar";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +8,7 @@ export const dynamic = "force-dynamic";
 /** Live stats for the landing page (on-chain counter + registry + claims). */
 export async function GET() {
   try {
+    await bootstrapDemoClaims();
     const [tokenCount, issuers, claims] = await Promise.all([
       readTokenCount(),
       readIssuers(),

@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { getClaim, putClaim } from "@/lib/store";
+import { bootstrapDemoClaims } from "@/lib/demo-claims";
 import { requireOrganizer } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 /** Get a single claim. */
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  await bootstrapDemoClaims();
   const { id } = await ctx.params;
   const claim = await getClaim(id);
   if (!claim) return NextResponse.json({ error: "claim not found" }, { status: 404 });
