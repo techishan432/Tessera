@@ -14,9 +14,17 @@
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { Keypair } from "@stellar/stellar-sdk";
 import { attemptTransfer } from "../lib/stellar/contracts";
 
 const BASE = process.env.SEED_BASE ?? "http://localhost:3000";
+
+/**
+ * The full pilot-org roster. The deploy guarantees every roster org exists in
+ * the on-chain issuer registry (idempotent — already-registered orgs are
+ * skipped), so the org picker is complete on every fresh deployment.
+ */
+const ORG_ROSTER = ["FIEM ACM", "GDG Groups", "HackSpire", "GDG Kolkata", "GDG Bengaluru"];
 
 function loadEnvFile() {
   // Load .env.local into process.env (for direct contract calls below).
@@ -121,6 +129,29 @@ async function main() {
   const organizerKey = env("ORGANIZER_API_KEY");
   if (!organizerKey) throw new Error("ORGANIZER_API_KEY not found in .env.local");
   const hasLlm = Boolean(env("LLM_API_KEY"));
+
+  // Deploy step: ensure the full org roster is registered on-chain.
+  log("Ensuring the org roster is registered in the issuer registry…");
+  const rosterKeys = env("ORG_ISSUER_KEYS")
+    ? (JSON.parse(env("ORG_ISSUER_KEYS")) as Record<string, string>)
+    : {};
+  const registered = new Set(
+    (await api<{ issuers: { orgName: string }[] }>("/api/issuers")).issuers.map((i) => i.orgName)
+  );
+  for (const org of ORG_ROSTER) {
+    const secret = rosterKeys[org];
+    if (!secret) {
+      warn(`${org}: no key in ORG_ISSUER_KEYS — add it to register this org`);
+      continue;
+    }
+    if (registered.has(org)) {
+      ok(`${org}: already registered`);
+      continue;
+    }
+    const address = Keypair.fromSecret(secret).publicKey();
+    await api("/api/issuers", { orgName: org, address });
+    ok(`${org}: registered issuer ${address.slice(0, 10)}… (admin-signed add_issuer)`);
+  }
 
   const results: { seed: SeedClaim; claim: Claim; profileUrl: string }[] = [];
   const existing = (await api<{ claims: Claim[] }>("/api/claims")).claims;
