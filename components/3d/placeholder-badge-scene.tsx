@@ -1,9 +1,6 @@
 "use client";
-
-// Placeholder R3F scene — validates the fiber/drei/wiring. Replaced by the
-// real hero + credential-wall scenes in Phase 4. Always consumed via
-// dynamic(() => import(...), { ssr: false }).
-import { useRef } from "react";
+ 
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
@@ -38,6 +35,19 @@ function RotatingBadge({ reducedMotion }: { reducedMotion: boolean }) {
 
 export default function PlaceholderBadgeScene() {
   const reducedMotion = useReducedMotion();
+  const [webglSupported, setWebglSupported] = useState(true);
+
+  useEffect(() => {
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      if (!gl) setWebglSupported(false);
+    } catch {
+      setWebglSupported(false);
+    }
+  }, []);
+
+  if (!webglSupported) return null;
 
   return (
     <Canvas camera={{ position: [0, 0, 3], fov: 45 }} dpr={[1, 2]}>

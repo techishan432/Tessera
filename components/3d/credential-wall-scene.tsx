@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { RoundedBox, Text } from "@react-three/drei";
@@ -205,10 +205,24 @@ export default function CredentialWallScene({
   selected: number | null;
   onSelect: (index: number) => void;
 }) {
+  const [webglSupported, setWebglSupported] = useState(true);
+
+  useEffect(() => {
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      if (!gl) setWebglSupported(false);
+    } catch {
+      setWebglSupported(false);
+    }
+  }, []);
+
   const items = useMemo(
     () => credentials.map((c, i) => ({ credential: c, pos: layout(i, credentials.length) })),
     [credentials]
   );
+
+  if (!webglSupported) return null;
 
   // recentre the wall vertically for small rows
   const rows = Math.ceil(credentials.length / PER_ROW);
