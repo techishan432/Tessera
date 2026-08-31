@@ -49,7 +49,7 @@ flowchart LR
     API -->|signed mint XDR + reads| RPC
     RPC --> CC
     CC -->|is_authorized_issuer| IR
-    API -->|sponsored accounts (1 XLM)| H
+    API -->|"sponsored accounts — 1 XLM reserve"| H
     API -->|pin metadata| IPFS
 ```
 
@@ -124,7 +124,7 @@ flowchart LR
     CH -->|cross-contract authz check| REG
     FS -->|pin metadata JSON| IPFS
     IPFS -->|"only the CID goes on-chain"| CH
-    CH -->|"credential {id, holder, issuer, org, cid, issued_at}"| WAL2
+    CH -->|"credential: id · holder · issuer · org · cid · issued_at"| WAL2
     CH -->|get_credentials · token_count| PROF
     IPFS -.->|full metadata by CID| PROF
 ```
