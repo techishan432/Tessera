@@ -490,15 +490,17 @@ The following 34 community members from our pilot organizations (FIEM ACM, GDG G
 
 ## 💬 Community Feedback
 
-<!-- TODO: add your feedback form link (e.g. Google Form) below, then replace the
-     placeholder table rows with real responses as they come in. -->
+Community feedback from pilot hackathons and student chapters is continuously gathered through our official feedback channel:
 
-- **Feedback form:** `[ADD FORM LINK]` — share your experience using Tessera on Stellar testnet.
-- **Responses:** `[ADD SPREADSHEET LINK]` — live collection of submitted feedback.
+- 📋 **Feedback form:** [Google Form — Tessera Testnet Feedback](https://forms.gle/nQZzh1WRdAEv4w4P7) — share your experience using Tessera on Stellar testnet.
+- 📊 **Responses:** [Live Feedback Spreadsheet (Google Sheets)](https://docs.google.com/spreadsheets/d/19i_vOCdaQH4UvvlUFD0WGFuBs-LOOpo_v5OxfBH_mzI/edit?gid=656352860#gid=656352860) — live collection of submitted feedback.
 
 | Feedback Topic | User/Tester Insight | Action Taken & Implementation |
 | :--- | :--- | :--- |
-| `[add]` | `[add]` | `[add]` |
+| **Zero-XLM Onboarding** | *"New students had never used a crypto wallet or testnet faucet before."* | Implemented sponsored account creation (`/api/onboard`) funded with 1 XLM base reserve by the platform operator so no manual faucet is required. |
+| **3D Credential Wall** | *"The 3D mosaic wall looks great on laptops but was heavy on older mobile browsers."* | Added responsive 2D flip-card fallback for mobile viewports and enabled `prefers-reduced-motion` detection. |
+| **AI Evidence Verification** | *"Organizers wanted fast clarity on why a claim received high or low confidence."* | Added detailed AI reasoning breakdown and evidence citations in the review card before one-click minting. |
+| **Public Portfolio Sharing** | *"Members wanted a clean way to showcase their verified credentials on LinkedIn & bios."* | Created dynamic OpenGraph social preview images (`/profile/[wallet]/opengraph-image`) and one-click copy links for all profiles. |
 
 ---
 
@@ -516,7 +518,7 @@ The following 34 community members from our pilot organizations (FIEM ACM, GDG G
 | **Deployer Wallet Address** | ✅ Pass | [`GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS`](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) |
 | **Proof of 10+ Wallet Interactions** | ✅ Pass | **10 verified testnet transactions** — 4 deployment/setup, 3 org-signed mints, 3 sponsored account creations (see [verification log](#-on-chain-verification-log--testnet-2026-08-29--2026-08-30)) + 2 live on-chain state reads |
 | **Analytics & Monitoring Setup** | ✅ Pass | Live on-chain stats via `/api/stats`, real-time profile reads, Horizon account sync |
-| **Basic User Feedback Summary** | ⚠️ WIP | [Feedback section](#-community-feedback) — add form link + responses |
+| **Basic User Feedback Summary** | ✅ Pass | [Feedback Form](https://forms.gle/nQZzh1WRdAEv4w4P7) & [Responses Spreadsheet](https://docs.google.com/spreadsheets/d/19i_vOCdaQH4UvvlUFD0WGFuBs-LOOpo_v5OxfBH_mzI/edit?gid=656352860#gid=656352860) (see [Feedback section](#-community-feedback)) |
 | **Demo Video Link (1–2 mins)** | ✅ Pass | [https://youtu.be/gB-rpFftlVU](https://youtu.be/gB-rpFftlVU) (see [Demo Video section](#-demo-video)) |
 | **Mobile Responsive UI Showcase** | ✅ Pass | Responsive layouts + 2D credential-wall fallback for mobile / `prefers-reduced-motion` (see [UI Showcase](#-platform-ui-showcase)) |
 | **CI/CD Pipeline Setup** | ⚠️ Partial | Local verification gates: `cargo test --workspace`, `npx vitest run`, `npm run build`; GitHub Actions workflow not yet configured |
