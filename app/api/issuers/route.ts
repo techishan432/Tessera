@@ -15,7 +15,15 @@ export async function GET() {
     const issuers = await readIssuers();
     return NextResponse.json({ issuers });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 502 });
+    // Diagnostics: include the attempted contract ID so deployment env issues
+    // (missing/wrong ISSUER_REGISTRY_CONTRACT_ID) are visible in the UI.
+    return NextResponse.json(
+      {
+        error: (e as Error).message,
+        contractId: process.env.ISSUER_REGISTRY_CONTRACT_ID ?? "(ISSUER_REGISTRY_CONTRACT_ID not set)",
+      },
+      { status: 502 }
+    );
   }
 }
 

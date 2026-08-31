@@ -14,11 +14,14 @@ export function IssuersPanel({
   onAdd,
   onRemove,
   busy,
+  error,
 }: {
   issuers: Issuer[];
   onAdd: (address: string, orgName: string) => Promise<string | null>;
   onRemove: (address: string) => Promise<string | null>;
   busy: boolean;
+  /** Present when the on-chain registry read failed (deploy env issues). */
+  error: string | null;
 }) {
   const [address, setAddress] = useState("");
   const [orgName, setOrgName] = useState("");
@@ -36,6 +39,17 @@ export function IssuersPanel({
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="rounded-xl border border-bad/30 bg-bad/10 px-4 py-3" role="alert">
+          <p className="text-xs font-medium text-bad">Could not load registered organizations from the issuer registry.</p>
+          <p className="mt-1 break-words text-xs leading-relaxed text-muted">
+            {error}
+            {error.includes("ISSUER_REGISTRY_CONTRACT_ID")
+              ? " — check the deployment's environment variables (Project → Settings → Environment Variables)."
+              : " — check the server logs and the ISSUER_REGISTRY_CONTRACT_ID / ISSUER_SECRET_KEY environment variables."}
+          </p>
+        </div>
+      )}
       <div className="glass overflow-hidden rounded-2xl">
         <table className="w-full text-sm">
           <thead>

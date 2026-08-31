@@ -117,7 +117,7 @@ export default function OnboardPage() {
 
   // claim form
   const [issuers, setIssuers] = useState<{ address: string; orgName: string }[]>([]);
-  const [issuersError, setIssuersError] = useState(false);
+  const [issuersError, setIssuersError] = useState<string | null>(null);
   const [draft, setDraft] = useState<ClaimDraft>({
     type: "mentoring",
     description: "",
@@ -132,12 +132,12 @@ export default function OnboardPage() {
   const loadIssuers = useCallback(async () => {
     try {
       const r = await fetch("/api/issuers");
-      const d = await r.json();
-      if (!r.ok) throw new Error();
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error ?? `issuer API error (HTTP ${r.status})`);
       setIssuers(d.issuers ?? []);
-      setIssuersError(false);
-    } catch {
-      setIssuersError(true);
+      setIssuersError(null);
+    } catch (e) {
+      setIssuersError(e instanceof Error ? e.message : "Could not load registered organizations.");
     }
   }, []);
 
@@ -147,12 +147,12 @@ export default function OnboardPage() {
     (async () => {
       try {
         const r = await fetch("/api/issuers");
-        const d = await r.json();
-        if (!r.ok) throw new Error();
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.error ?? `issuer API error (HTTP ${r.status})`);
         setIssuers(d.issuers ?? []);
-        setIssuersError(false);
-      } catch {
-        setIssuersError(true);
+        setIssuersError(null);
+      } catch (e) {
+        setIssuersError(e instanceof Error ? e.message : "Could not load registered organizations.");
       }
     })();
   }, []);
@@ -649,9 +649,15 @@ export default function OnboardPage() {
 
               <Field label="Issuing organization" hint="The org whose registered wallet signs your credential on-chain.">
                 {issuersError ? (
-                  <div className="flex items-center justify-between rounded-xl border border-bad/30 bg-bad/10 px-4 py-3">
-                    <span className="text-xs text-bad">Could not load registered organizations.</span>
-                    <button onClick={loadIssuers} className="text-xs text-primary underline-offset-4 hover:underline">
+                  <div className="rounded-xl border border-bad/30 bg-bad/10 px-4 py-3">
+                    <span className="text-xs font-medium text-bad">Could not load registered organizations.</span>
+                    <p className="mt-1 break-words text-xs leading-relaxed text-muted">
+                      {issuersError}
+                      {issuersError.includes("ISSUER_REGISTRY_CONTRACT_ID")
+                        ? " — check the Vercel project environment variables."
+                        : " — check the server logs / environment variables."}
+                    </p>
+                    <button onClick={loadIssuers} className="mt-2 text-xs text-primary underline-offset-4 hover:underline">
                       retry
                     </button>
                   </div>

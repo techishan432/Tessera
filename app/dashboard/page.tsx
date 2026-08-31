@@ -61,6 +61,7 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<"claims" | "issuers">("claims");
   const [claims, setClaims] = useState<Claim[]>([]);
   const [issuers, setIssuers] = useState<Issuer[]>([]);
+  const [issuerError, setIssuerError] = useState<string | null>(null);
   const [keyOverride, setKeyOverride] = useState<string | null>(null);
   const [keyDraft, setKeyDraft] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
@@ -78,12 +79,14 @@ export default function DashboardPage() {
 
   const refresh = useCallback(async () => {
     try {
-      const [c, i] = await Promise.all([
+      const [c, iRes] = await Promise.all([
         fetch("/api/claims").then((r) => r.json()),
-        fetch("/api/issuers").then((r) => r.json()),
+        fetch("/api/issuers"),
       ]);
+      const i = await iRes.json().catch(() => ({}));
       setClaims(c.claims ?? []);
       setIssuers(i.issuers ?? []);
+      setIssuerError(iRes.ok ? null : i.error ?? `issuer API error (HTTP ${iRes.status})`);
     } catch {
       setNotice({ kind: "err", text: "Could not reach the API." });
     }
@@ -93,12 +96,14 @@ export default function DashboardPage() {
     // Initial load (local IIFE so the effect body has no direct setState).
     (async () => {
       try {
-        const [c, i] = await Promise.all([
+        const [c, iRes] = await Promise.all([
           fetch("/api/claims").then((r) => r.json()),
-          fetch("/api/issuers").then((r) => r.json()),
+          fetch("/api/issuers"),
         ]);
+        const i = await iRes.json().catch(() => ({}));
         setClaims(c.claims ?? []);
         setIssuers(i.issuers ?? []);
+        setIssuerError(iRes.ok ? null : i.error ?? `issuer API error (HTTP ${iRes.status})`);
       } catch {
         setNotice({ kind: "err", text: "Could not reach the API." });
       }
@@ -477,7 +482,7 @@ export default function DashboardPage() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
           >
-            <IssuersPanel issuers={issuers} onAdd={onAddIssuer} onRemove={onRemoveIssuer} busy={busyId === "issuers"} />
+            <IssuersPanel issuers={issuers} onAdd={onAddIssuer} onRemove={onRemoveIssuer} busy={busyId === "issuers"} error={issuerError} />
           </motion.section>
         )}
       </AnimatePresence>

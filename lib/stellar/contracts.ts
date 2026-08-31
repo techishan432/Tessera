@@ -182,7 +182,7 @@ export async function attemptTransfer(
 
 export async function readIssuers(): Promise<{ address: string; orgName: string }[]> {
   const scv = await callRead(registryContractId(), "get_issuers", []);
-  if (!scv) return [];
+  if (!scv) throw new Error("get_issuers returned no data — the issuer registry may not be initialized");
   return scvVec(scv).map(scvIssuerPair);
 }
 
