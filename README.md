@@ -222,7 +222,8 @@ The two contracts form the trust core: `credential-contract` mints soulbound cre
 | `mint(issuer, to, metadata_cid)` | issuer must sign + be registry-authorized | sequential on-chain IDs; stores holder, issuer, org name, CID, timestamp |
 | `transfer(from, to, id)` | — | **always reverts.** The soulbound invariant |
 | `burn(authorized_by, token_id)` | holder **or** issuing org | self-revocation / org revocation |
-| `get_credentials(holder)` · `get_token(id)` · `token_count()` | none | public reads powering profile + landing stats |
+| `get_credentials(holder)` · `get_token(id)` · `token_count()` · `get_issuer_credential_ids(issuer)` | none | public reads powering profile, landing stats, and org dashboards ("what has this org issued?") |
+| events: `mint` · `burn` | — | `#[contractevent]` observability — visible in Stellar Expert, consumable by listeners. `mint` topics `[mint, issuer, to]`, data: token id · `burn` topics `[burn, token_id]`, data: who authorized |
 
 ### `issuer-registry` (Rust)
 
@@ -232,6 +233,7 @@ The two contracts form the trust core: `credential-contract` mints soulbound cre
 | `add_issuer(admin, issuer, org_name)` | admin | registers an org's signing address |
 | `remove_issuer(admin, issuer)` | admin | revokes new mints; previously minted credentials stay valid |
 | `is_authorized_issuer(issuer)` · `org_name(issuer)` · `get_issuers()` · `get_admin()` | none | public reads (the credential contract calls `is_authorized_issuer` on every mint) |
+| events: `add_issuer` · `remove_issuer` | — | `#[contractevent]` observability. `add_issuer` topics `[add_issuer, issuer]`, data: org name · `remove_issuer` topics `[remove_issuer, issuer]`, data: revoking admin |
 
 | Parameter | Value / Address | Status |
 | :--- | :--- | :-: |
@@ -245,7 +247,7 @@ The two contracts form the trust core: `credential-contract` mints soulbound cre
 | **Registry Explorer** | [View issuer-registry on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CD2MLVE5YNLFELC4FKV5NDYFJ3YRN6IQXEQXUNCXTIFZLUUTNFZCK7AH) | 🔗 Explorer |
 | **Deployer Explorer** | [View Deployer Account on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) | 🔗 Explorer |
 
-> **WASM provenance:** the on-chain WASM hashes (via the Stellar Expert contract API) are byte-identical to the SHA-256 of the `target/wasm32v1-none/release/` artifacts built from this repo's `contracts/` — i.e. the deployed code is exactly the code in the repository.
+> **WASM provenance:** the on-chain WASM hashes (via the Stellar Expert contract API) match the SHA-256 of the artifacts built from this repo's `contracts/` at deployment time. The repo now carries a **new contract version** — `#[contractevent]` observability events (`mint`, `burn`, `add_issuer`, `remove_issuer`) and `get_issuer_credential_ids()` enumeration — which is **pending redeploy** to testnet (same flow as the 2026-08-29 deploy; every call the app makes today is unchanged, so the live deployment keeps working until then).
 
 ---
 
@@ -275,7 +277,7 @@ Notes:
 
 ---
 
-## 🧪 Smart Contract Unit Test Output (16/16 Tests Passing)
+## 🧪 Smart Contract Unit Test Output (21/21 Tests Passing)
 
 Internal security review and test suite run (no external audit performed):
 
@@ -286,41 +288,46 @@ cd contracts && cargo test --workspace
 ```text
 Running tests/soulbound.rs (credential-contract)
 
-running 10 tests
+running 13 tests
 test mint_after_issuer_revocation_fails ... ok
-test set_registry_is_admin_gated ... ok
 test mint_by_unauthorized_address_fails ... ok
-test burn_by_holder_self_revoke ... ok
 test burn_by_issuer_revokes ... ok
-test burn_by_unrelated_address_fails ... ok
+test burn_emits_event ... ok
+test burn_by_holder_self_revoke ... ok
 test mint_by_authorized_issuer_succeeds ... ok
+test burn_by_unrelated_address_fails ... ok
+test get_issuer_credential_ids_tracks_mints_and_burns ... ok
+test set_registry_is_admin_gated ... ok
+test get_credentials_excludes_burned_and_keeps_order ... ok
 test transfer_always_fails_soulbound ... ok
 test multiple_issuers_each_track_their_credentials ... ok
-test get_credentials_excludes_burned_and_keeps_order ... ok
+test mint_emits_event ... ok
 
-test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
 
 Running tests/registry.rs (issuer-registry)
 
-running 6 tests
-test unregistered_address_is_not_authorized ... ok
+running 8 tests
 test remove_unknown_issuer_fails ... ok
+test unregistered_address_is_not_authorized ... ok
 test only_admin_can_remove_issuer ... ok
 test only_admin_can_add_issuer ... ok
 test add_issuer_registers_org_name ... ok
 test remove_issuer_revokes_authorization ... ok
+test add_issuer_emits_event ... ok
+test remove_issuer_emits_event ... ok
 
-test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
 ```
 
-Coverage includes issuer authorization for minting, revocation (issuer and holder), the soulbound `transfer` invariant, admin-gated registry mutation, and burned-credential ordering.
+Coverage includes issuer authorization for minting, revocation (issuer and holder), the soulbound `transfer` invariant, admin-gated registry mutation, burned-credential ordering, per-issuer credential enumeration, and the contract events (`mint`, `burn`, `add_issuer`, `remove_issuer`) with exact topic/data payloads.
 
 Frontend verification pipeline is covered separately:
 
 ```bash
 npx vitest run
 # Test Files  1 passed (1)
-#      Tests  16 passed (16)   ← tests/ai-verify.test.ts
+#      Tests  25 passed (25)   ← tests/ai-verify.test.ts
 ```
 
 ---
@@ -523,14 +530,14 @@ Community feedback from pilot hackathons and student chapters is continuously ga
 | **Basic User Feedback Summary** | ✅ Pass | [Feedback Form](https://forms.gle/nQZzh1WRdAEv4w4P7) & [Responses Spreadsheet](https://docs.google.com/spreadsheets/d/19i_vOCdaQH4UvvlUFD0WGFuBs-LOOpo_v5OxfBH_mzI/edit?gid=656352860#gid=656352860) (see [Feedback section](#-community-feedback)) |
 | **Demo Video Link (1–2 mins)** | ✅ Pass | [https://youtu.be/gB-rpFftlVU](https://youtu.be/gB-rpFftlVU) (see [Demo Video section](#-demo-video)) |
 | **Mobile Responsive UI Showcase** | ✅ Pass | Responsive layouts + 2D credential-wall fallback for mobile / `prefers-reduced-motion` (see [UI Showcase](#-platform-ui-showcase)) |
-| **CI/CD Pipeline Setup** | ✅ Pass | Automated GitHub Actions workflow ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) testing 16 Rust Soroban contract tests + 25 Vitest test cases + production Next.js build |
-| **Contract & Full-Stack Unit Tests** | ✅ Pass | **41/41** passing — **16/16** Rust contract tests (`cargo test --workspace`) + **25/25** full-stack tests (`vitest run`) |
+| **CI/CD Pipeline Setup** | ✅ Pass | Automated GitHub Actions workflow ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) testing 21 Rust Soroban contract tests + 25 Vitest test cases + production Next.js build |
+| **Contract & Full-Stack Unit Tests** | ✅ Pass | **46/46** passing — **21/21** Rust contract tests (`cargo test --workspace`) + **25/25** full-stack tests (`vitest run`) |
 
-> **Production Deployment Verification**: continuous delivery via Vercel at [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app). All 37 commits pushed to `main`.
+> **Production Deployment Verification**: continuous delivery via Vercel at [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app). All commits pushed to `main`.
 
 - [x] **Soroban Smart Contract Implementation**: two custom Rust Soroban contracts (`contracts/credential-contract`, `contracts/issuer-registry`) enforcing soulbound non-transferability and org-gated issuance.
-- [x] **Stellar Testnet Deployment**: both contracts live on testnet (protocol 28), WASM hashes verified byte-identical to the repo build.
-- [x] **Automated Smart Contract Tests**: 16/16 passing Rust tests covering authorization, revocation, and the soulbound invariant.
+- [x] **Stellar Testnet Deployment**: both contracts live on testnet (protocol 28); the new observability version (contract events + issuer enumeration) is pending redeploy.
+- [x] **Automated Smart Contract Tests**: 21/21 passing Rust tests covering authorization, revocation, the soulbound invariant, events, and per-issuer enumeration.
 - [x] **Full-Stack SaaS Web App**: single Next.js 16 deployable — marketing landing, organizer dashboard, wallet onboarding, public 3D credential wall.
 - [x] **Stellar Wallet & Freighter Integration**: stellar-wallet-kit wallet connect + sponsored zero-XLM account onboarding.
 - [x] **Video Demonstration**: [Watch on YouTube (https://youtu.be/gB-rpFftlVU)](https://youtu.be/gB-rpFftlVU).
