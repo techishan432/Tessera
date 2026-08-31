@@ -5,6 +5,7 @@
 Tessera mints **non-transferable (soulbound) credentials** on Stellar's **Soroban** smart-contract platform for the work that never lands on a résumé: mentoring at a hackathon, a merged open-source PR, the talk you actually gave. Authorized community organizations issue them; they land in a member's Stellar wallet as a portable, verifiable Web3 résumé — a public 3D "credential wall" you can drop a link to in your bio.
 
 🌐 **Live Production Demo**: [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app)
+📹 **Live Demo Video**: [https://youtu.be/gB-rpFftlVU](https://youtu.be/gB-rpFftlVU)
 📁 **Public GitHub Repo**: [https://github.com/techishan432/Tessera](https://github.com/techishan432/Tessera)
 
 **Pilot communities:** FIEM ACM · GDG Groups · HackSpire
@@ -475,7 +476,7 @@ Plus browser-side memory: the organizer key persists in `localStorage["tessera.o
 | **Proof of 10+ Wallet Interactions** | ✅ Pass | **10 verified testnet transactions** — 4 deployment/setup, 3 org-signed mints, 3 sponsored account creations (see [verification log](#-on-chain-verification-log--testnet-2026-08-29--2026-08-30)) + 2 live on-chain state reads |
 | **Analytics & Monitoring Setup** | ✅ Pass | Live on-chain stats via `/api/stats`, real-time profile reads, Horizon account sync |
 | **Basic User Feedback Summary** | ⚠️ WIP | [Feedback section](#-community-feedback) — add form link + responses |
-| **Demo Video Link (1–2 mins)** | ⚠️ WIP | [Demo Video section](#-demo-video) — add YouTube link |
+| **Demo Video Link (1–2 mins)** | ✅ Pass | [https://youtu.be/gB-rpFftlVU](https://youtu.be/gB-rpFftlVU) (see [Demo Video section](#-demo-video)) |
 | **Mobile Responsive UI Showcase** | ✅ Pass | Responsive layouts + 2D credential-wall fallback for mobile / `prefers-reduced-motion` (see [UI Showcase](#-platform-ui-showcase)) |
 | **CI/CD Pipeline Setup** | ⚠️ Partial | Local verification gates: `cargo test --workspace`, `npx vitest run`, `npm run build`; GitHub Actions workflow not yet configured |
 | **Contract Unit Tests** | ✅ Pass | **16/16** passing (`cargo test --workspace`) + 16/16 frontend pipeline tests (`vitest`) |
@@ -487,7 +488,7 @@ Plus browser-side memory: the organizer key persists in `localStorage["tessera.o
 - [x] **Automated Smart Contract Tests**: 16/16 passing Rust tests covering authorization, revocation, and the soulbound invariant.
 - [x] **Full-Stack SaaS Web App**: single Next.js 16 deployable — marketing landing, organizer dashboard, wallet onboarding, public 3D credential wall.
 - [x] **Stellar Wallet & Freighter Integration**: stellar-wallet-kit wallet connect + sponsored zero-XLM account onboarding.
-- [ ] **Video Demonstration**: `[add YouTube link]`.
+- [x] **Video Demonstration**: [Watch on YouTube (https://youtu.be/gB-rpFftlVU)](https://youtu.be/gB-rpFftlVU).
 - [ ] **Visual UI Showcase**: `[add screenshots below]`.
 
 ---
@@ -528,9 +529,9 @@ Plus browser-side memory: the organizer key persists in `localStorage["tessera.o
 
 ## 🎥 Demo Video
 
-<!-- TODO: record a 1–2 min walkthrough (landing → dashboard → mint → profile wall) and paste the link. -->
+[![Tessera Live Demo Video](https://img.youtube.com/vi/gB-rpFftlVU/maxresdefault.jpg)](https://youtu.be/gB-rpFftlVU)
 
-▶️ **Watch the Platform & Soulbound-Escrow Demo on YouTube**: `[ADD YOUTUBE LINK]`
+▶️ **Watch the Platform & Soulbound-Escrow Demo on YouTube**: [https://youtu.be/gB-rpFftlVU](https://youtu.be/gB-rpFftlVU)
 
 ---
 
