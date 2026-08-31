@@ -37,8 +37,8 @@ flowchart LR
 
     subgraph StellarNet["Stellar Testnet — protocol 28"]
         RPC["Soroban RPC<br/>soroban-testnet.stellar.org"]
-        CC["credential-contract<br/>CBU3…F64<br/>(soulbound token)"]
-        IR["issuer-registry<br/>CD2M…K7AH<br/>(org RBAC)"]
+        CC["credential-contract<br/>CD37…F33<br/>(soulbound token)"]
+        IR["issuer-registry<br/>CA72…WQQ<br/>(org RBAC)"]
         H["Horizon API"]
     end
 
@@ -238,42 +238,45 @@ The two contracts form the trust core: `credential-contract` mints soulbound cre
 | Parameter | Value / Address | Status |
 | :--- | :--- | :-: |
 | **Network** | **Stellar Testnet** (protocol 28) | 🟢 Live |
-| **`credential-contract` ID** | [`CBU3BDDRG5Z6XOS5JID7FZBOQJE7PZCUUIYZGWTZGS3AGEUPU4RYTF64`](https://stellar.expert/explorer/testnet/contract/CBU3BDDRG5Z6XOS5JID7FZBOQJE7PZCUUIYZGWTZGS3AGEUPU4RYTF64) | 🟢 Verified |
-| **`issuer-registry` ID** | [`CD2MLVE5YNLFELC4FKV5NDYFJ3YRN6IQXEQXUNCXTIFZLUUTNFZCK7AH`](https://stellar.expert/explorer/testnet/contract/CD2MLVE5YNLFELC4FKV5NDYFJ3YRN6IQXEQXUNCXTIFZLUUTNFZCK7AH) | 🟢 Verified |
+| **`credential-contract` ID** | [`CD37QKHU4C37Z6A33G3QTW4PF45DHR4QS32DL2U7DZBMELSDCBDYMF33`](https://stellar.expert/explorer/testnet/contract/CD37QKHU4C37Z6A33G3QTW4PF45DHR4QS32DL2U7DZBMELSDCBDYMF33) | 🟢 Verified |
+| **`issuer-registry` ID** | [`CA72HVGIPEWJVMNSQU3SAAUUGNIFKBBRIB2OX2QI6GFOYXKVCJOTXWQQ`](https://stellar.expert/explorer/testnet/contract/CA72HVGIPEWJVMNSQU3SAAUUGNIFKBBRIB2OX2QI6GFOYXKVCJOTXWQQ) | 🟢 Verified |
 | **Deployer / Admin Wallet** | [`GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS`](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) | 🟢 Active |
 | **credential WASM sha256** | `ae43a75cf8c96cb98cb3449c68991ba75f97059ff8d16f98300971ae4214a86b` (18,848 B) | 🟢 Matches on-chain |
 | **registry WASM sha256** | `2f95a6563845f9911ebe031e0ef1a8a0f479c69f1f075e8e475e5393ad7f3f3e` (8,339 B) | 🟢 Matches on-chain |
-| **Credential Explorer** | [View credential-contract on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CBU3BDDRG5Z6XOS5JID7FZBOQJE7PZCUUIYZGWTZGS3AGEUPU4RYTF64) | 🔗 Explorer |
-| **Registry Explorer** | [View issuer-registry on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CD2MLVE5YNLFELC4FKV5NDYFJ3YRN6IQXEQXUNCXTIFZLUUTNFZCK7AH) | 🔗 Explorer |
+| **Credential Explorer** | [View credential-contract on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CD37QKHU4C37Z6A33G3QTW4PF45DHR4QS32DL2U7DZBMELSDCBDYMF33) | 🔗 Explorer |
+| **Registry Explorer** | [View issuer-registry on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CA72HVGIPEWJVMNSQU3SAAUUGNIFKBBRIB2OX2QI6GFOYXKVCJOTXWQQ) | 🔗 Explorer |
 | **Deployer Explorer** | [View Deployer Account on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) | 🔗 Explorer |
 
-> **WASM provenance:** the on-chain WASM hashes (via the Stellar Expert contract API) match the SHA-256 of the artifacts built from this repo's `contracts/` at deployment time. The repo now carries a **new contract version** — `#[contractevent]` observability events (`mint`, `burn`, `add_issuer`, `remove_issuer`) and `get_issuer_credential_ids()` enumeration — which is **pending redeploy** to testnet (same flow as the 2026-08-29 deploy; every call the app makes today is unchanged, so the live deployment keeps working until then).
+> **WASM provenance:** the on-chain WASM hashes (via the Stellar Expert contract API) are byte-identical to the SHA-256 of the `target/wasm32v1-none/release/` artifacts built from this repo's `contracts/` — the live v2 deployment (2026-08-31) includes `#[contractevent]` observability events (`mint`, `burn`, `add_issuer`, `remove_issuer`) and `get_issuer_credential_ids()` enumeration. The previous 2026-08-29 deployment (credential `CBU3…F64`, registry `CD2M…K7AH`) is superseded and no longer referenced by the application.
 
 ---
 
-## 🔗 On-Chain Verification Log — Testnet (2026-08-29 / 2026-08-30)
+## 🔗 On-Chain Verification Log — Testnet (2026-08-31)
 
-Every transaction below was re-verified against Horizon, the Soroban RPC, and the Stellar Expert API on 2026-08-30 and covers the full lifecycle — deployment, setup, live state reads, issuance, and the security-critical soulbound rejection:
+Every transaction below was re-verified against Horizon, the Soroban RPC, and the Stellar Expert API on 2026-08-31 and covers the full lifecycle of the **v2 deployment** (contract events + issuer enumeration) — deployment, setup, live state reads, issuance, and the security-critical soulbound rejection:
 
 | # | Action | Result | Transaction Hash | Ledger |
 | :-: | :--- | :-: | :--- | :-: |
-| **1** | `issuer-registry` deployment (`create_contract`) by `GDQZ…2LYS` | ✅ | [`6ced192da946eba6b71340355a00c75a196acc6f418a4a8d2d7bd74cf28b2e4a`](https://stellar.expert/explorer/testnet/tx/6ced192da946eba6b71340355a00c75a196acc6f418a4a8d2d7bd74cf28b2e4a) | 4402632 |
-| **2** | registry `initialize(admin)` | ✅ | [`baee08d25fd4573948ffd2415fa0531e1f540573bea0ef6a6ec9324fb0b63b5b`](https://stellar.expert/explorer/testnet/tx/baee08d25fd4573948ffd2415fa0531e1f540573bea0ef6a6ec9324fb0b63b5b) | 4402635 |
-| **3** | credential-contract WASM upload | ✅ | [`9c07b5e2bc98a570f5dc891c93cc4d2c324c795fd85e403e0189e06c7b6f6687`](https://stellar.expert/explorer/testnet/tx/9c07b5e2bc98a570f5dc891c93cc4d2c324c795fd85e403e0189e06c7b6f6687) | 4402637 |
-| **4** | `credential-contract` deployment (`create_contract`) | ✅ | [`c16a20c4265a53af1436b369eb51c963c3e570372b79a518db9fca23dd4bc5ef`](https://stellar.expert/explorer/testnet/tx/c16a20c4265a53af1436b369eb51c963c3e570372b79a518db9fca23dd4bc5ef) | 4402638 |
-| **5** | registry `add_issuer` × 3 (FIEM ACM, GDG Groups, HackSpire) + credential `initialize(admin, registry)` | ✅ verified via live state (rows 6–7) | — | 4402639+ |
-| **6** | Live read: `credential-contract.token_count()` | ✅ returned `6` | — | — |
-| **7** | Live read: `issuer-registry.get_issuers()` | ✅ returned the 3 pilot orgs + addresses | — | — |
-| **8** | `mint` token #4 — HackSpire · mentoring (claimant `GBR2…CKY`) | ✅ fee ≈ 0.00004 XLM | [`34b339b1eeae2d656b3eadc014c0ad2c1c17a72f839a44058879cb22f30b5eba`](https://stellar.expert/explorer/testnet/tx/34b339b1eeae2d656b3eadc014c0ad2c1c17a72f839a44058879cb22f30b5eba) | 4413771 |
-| **9** | `mint` token #5 — GDG Groups · open-source PR (claimant `GB4B…ST5`) | ✅ | [`d139e6a61596911260464d06ca5679ec8bbec7a3bce8c375a23abfd14e9d93b7`](https://stellar.expert/explorer/testnet/tx/d139e6a61596911260464d06ca5679ec8bbec7a3bce8c375a23abfd14e9d93b7) | 4413773 |
-| **10** | `mint` token #6 — FIEM ACM · talk (claimant `GCNE…T3`) | ✅ | [`eb00382c0c76d6f5cda088a9cc450958b1fe21bf2745b8889b20950c2f2d43f0`](https://stellar.expert/explorer/testnet/tx/eb00382c0c76d6f5cda088a9cc450958b1fe21bf2745b8889b20950c2f2d43f0) | 4413775 |
-| **11** | `transfer` attempt on token #4 (soulbound check, run by `npm run seed`) | ❌ rejected on-chain — **as designed** | — (failed tx) | — |
+| **1** | `issuer-registry` v2 deployment by `GDQZ…2LYS` | ✅ | [`b2d668ccba9e20cd1e389647c80b67541bdf86dfdab5f2180cdabf1726784f03`](https://stellar.expert/explorer/testnet/tx/b2d668ccba9e20cd1e389647c80b67541bdf86dfdab5f2180cdabf1726784f03) | 4433094 |
+| **2** | registry `initialize(admin)` | ✅ | [`d5e541a2e378ba05bb3e9941959e2417d1573289b9d14c48304e117542632fc2`](https://stellar.expert/explorer/testnet/tx/d5e541a2e378ba05bb3e9941959e2417d1573289b9d14c48304e117542632fc2) | 4433098 |
+| **3** | `credential-contract` v2 deployment | ✅ | [`b1d80cacc6cb32d49b62b13dd62845ae62f7368aba434abcc764e1bc11adb200`](https://stellar.expert/explorer/testnet/tx/b1d80cacc6cb32d49b62b13dd62845ae62f7368aba434abcc764e1bc11adb200) | 4433104 |
+| **4** | credential `initialize(admin, registry)` | ✅ | [`cfd34297d5da04259e97a76e9be723684f36e505904c6531a2554ade954f8e79`](https://stellar.expert/explorer/testnet/tx/cfd34297d5da04259e97a76e9be723684f36e505904c6531a2554ade954f8e79) | 4433109 |
+| **5** | registry `add_issuer` — FIEM ACM | ✅ | [`9718088295953f8e663eb1b7df0d21f77edd13d4d00c673e44e8b1df5f17aca6`](https://stellar.expert/explorer/testnet/tx/9718088295953f8e663eb1b7df0d21f77edd13d4d00c673e44e8b1df5f17aca6) | 4433114 |
+| **6** | registry `add_issuer` — GDG Groups | ✅ | [`74708afd80b184e9b118e7c4b717576453a908220d28e84c62570aa65bfa3f22`](https://stellar.expert/explorer/testnet/tx/74708afd80b184e9b118e7c4b717576453a908220d28e84c62570aa65bfa3f22) | 4433116 |
+| **7** | registry `add_issuer` — HackSpire | ✅ | [`3dfa617311f02bddf3342f7d1467987a4453ef9345df54abb7d0607f7f475674`](https://stellar.expert/explorer/testnet/tx/3dfa617311f02bddf3342f7d1467987a4453ef9345df54abb7d0607f7f475674) | 4433117 |
+| **8** | Live read: `token_count()` / `get_issuers()` | ✅ returned `3` / the 3 pilot orgs | — | — |
+| **9** | `mint` token #1 — HackSpire · mentoring (claimant `GC6W…T4`) | ✅ fee ≈ 0.00004 XLM | [`cc14b76cdb998d856e4831cfc899f34127eba491437779457788b4c42b5fe236`](https://stellar.expert/explorer/testnet/tx/cc14b76cdb998d856e4831cfc899f34127eba491437779457788b4c42b5fe236) | 4433154 |
+| **10** | `mint` token #2 — GDG Groups · open-source PR (claimant `GC4N…2D`) | ✅ | [`e13be1f720b1453d3fb22ec206d9267182ed97a3ab244ea4405a393de0c70b00`](https://stellar.expert/explorer/testnet/tx/e13be1f720b1453d3fb22ec206d9267182ed97a3ab244ea4405a393de0c70b00) | 4433156 |
+| **11** | `mint` token #3 — FIEM ACM · talk (claimant `GAUR…SK`) | ✅ | [`4309edbf8512523fa2949a3f8df9a1c68bb5c94b1a96cb02a87b49f81a3a7b8b`](https://stellar.expert/explorer/testnet/tx/4309edbf8512523fa2949a3f8df9a1c68bb5c94b1a96cb02a87b49f81a3a7b8b) | 4433158 |
+| **12** | `transfer` attempt on token #1 (soulbound check, run by `npm run seed`) | ❌ rejected on-chain — **as designed** | — (failed tx) | — |
+| **13** | v2 observability check — contract events | ✅ 3 `mint` events (credential) + 3 `add_issuer` events (registry) visible in Stellar Expert | — | — |
 
 Notes:
 
-- Rows 8–10 were each signed by the respective **pilot org's own issuer key** (not the operator) — the orgs mint their own credentials; the registry is what makes it possible.
-- The mints succeed only because row 5's setup (registry `initialize`, three `add_issuer` calls, credential `initialize`) already completed — the registry gate and the registry pointer are preconditions enforced inside `mint`.
-- Live state reads (rows 6–7) were performed on 2026-08-30 via read-only RPC simulation; `token_count = 6` also includes the three credentials from the earlier end-to-end validation pass (tokens #1–#3).
+- Rows 9–11 were each signed by the respective **pilot org's own issuer key** (not the operator) — the orgs mint their own credentials; the registry is what makes it possible.
+- The mints succeed only because rows 2–7's setup (registry `initialize`, three `add_issuer` calls, credential `initialize`) already completed — the registry gate and the registry pointer are preconditions enforced inside `mint`.
+- Live state reads (row 8) were performed on 2026-08-31 via read-only RPC simulation.
+- The previous deployment (2026-08-29: credential `CBU3…F64`, registry `CD2M…K7AH`) is **superseded** by this v2 deployment and no longer referenced by the application; its three demo credentials (tokens #4–#6) remain on-chain at their original addresses for the record.
 
 ---
 
@@ -353,15 +356,15 @@ Testnet identities used for the live demo — balances as verified on 2026-08-30
 | **FIEM ACM** issuer (signs FIEM mints) | [`GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK`](https://stellar.expert/explorer/testnet/account/GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK) | 9,999.99 XLM |
 | **GDG Groups** issuer (signs GDG mints) | [`GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV`](https://stellar.expert/explorer/testnet/account/GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV) | 9,999.99 XLM |
 | **HackSpire** issuer (signs HackSpire mints) | [`GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K`](https://stellar.expert/explorer/testnet/account/GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K) | 9,999.99 XLM |
-| Demo member — mentoring credential (sponsored) | `GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY` | 1.0000000 XLM |
-| Demo member — PR credential (sponsored) | `GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5` | 1.0000000 XLM |
-| Demo member — talk credential (sponsored) | `GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3` | 1.0000000 XLM |
+| Demo member — mentoring credential (sponsored) | `GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4` | 1.0000000 XLM |
+| Demo member — PR credential (sponsored) | `GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D` | 1.0000000 XLM |
+| Demo member — talk credential (sponsored) | `GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK` | 1.0000000 XLM |
 
 The three demo members were sponsored with exactly the 1 XLM base reserve — **members never need their own XLM to receive credentials**. Their live credential walls:
 
-- [Mentoring credential (HackSpire)](https://tessera-beta-five.vercel.app/profile/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY)
-- [Open-source PR credential (GDG Groups)](https://tessera-beta-five.vercel.app/profile/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5)
-- [Talk credential (FIEM ACM)](https://tessera-beta-five.vercel.app/profile/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3)
+- [Mentoring credential (HackSpire)](https://tessera-beta-five.vercel.app/profile/GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4)
+- [Open-source PR credential (GDG Groups)](https://tessera-beta-five.vercel.app/profile/GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D)
+- [Talk credential (FIEM ACM)](https://tessera-beta-five.vercel.app/profile/GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK)
 
 > ⚠️ All keys are **testnet-only** identities used for the demo. Never put mainnet keys in this repo or its env files.
 
@@ -402,9 +405,9 @@ From then on, `claimantWallet` on every claim is the member's G-address, and the
 | Description | Gave a 10-minute lightning talk on soulbound credentials and portable community contribution history on Stellar |
 | Type · Event · Date | `talk` · GDG DevFest Kolkata · 2026-04-11 |
 | Evidence | [GDG community (event host)](https://gdg.community.dev/) |
-| Filed by (user) | Speaker member — [`GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3`](https://tessera-beta-five.vercel.app/profile/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) |
-| Status | minted · on-chain (token #6) |
-| Credential | token **#6** · [mint tx](https://stellar.expert/explorer/testnet/tx/eb00382c0c76d6f5cda088a9cc450958b1fe21bf2745b8889b20950c2f2d43f0) |
+| Filed by (user) | Speaker member — [`GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK`](https://tessera-beta-five.vercel.app/profile/GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK) |
+| Status | minted · on-chain (token #3) |
+| Credential | token **#3** · [mint tx](https://stellar.expert/explorer/testnet/tx/4309edbf8512523fa2949a3f8df9a1c68bb5c94b1a96cb02a87b49f81a3a7b8b) |
 
 **GDG Groups** — issuer wallet [`GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV`](https://stellar.expert/explorer/testnet/account/GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV)
 
@@ -413,9 +416,9 @@ From then on, `claimantWallet` on every claim is the member's G-address, and the
 | Description | Merged a pull request adding retry-with-backoff handling to the Soroban RPC client's transaction submission path |
 | Type · Event · Date | `pr` · js-soroban-client · 2026-05-14 |
 | Evidence | [Repository of the merged PR](https://github.com/stellar/js-soroban-client) |
-| Filed by (user) | Open-source member — [`GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5`](https://tessera-beta-five.vercel.app/profile/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) |
-| Status | minted · on-chain (token #5) |
-| Credential | token **#5** · [mint tx](https://stellar.expert/explorer/testnet/tx/d139e6a61596911260464d06ca5679ec8bbec7a3bce8c375a23abfd14e9d93b7) |
+| Filed by (user) | Open-source member — [`GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D`](https://tessera-beta-five.vercel.app/profile/GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D) |
+| Status | minted · on-chain (token #2) |
+| Credential | token **#2** · [mint tx](https://stellar.expert/explorer/testnet/tx/e13be1f720b1453d3fb22ec206d9267182ed97a3ab244ea4405a393de0c70b00) |
 
 **HackSpire** — issuer wallet [`GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K`](https://stellar.expert/explorer/testnet/account/GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K)
 
@@ -424,17 +427,17 @@ From then on, `claimantWallet` on every claim is the member's G-address, and the
 | Description | Mentored a first-time hackathon team through Soroban contract deployment, covering auth entries and testnet RPC |
 | Type · Event · Date | `mentoring` · HackSpire 2026 · 2026-03-21 |
 | Evidence | [Soroban examples used in the mentoring session](https://github.com/stellar/soroban-examples) |
-| Filed by (user) | Mentoring member — [`GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY`](https://tessera-beta-five.vercel.app/profile/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) |
-| Status | minted · on-chain (token #4) |
-| Credential | token **#4** · [mint tx](https://stellar.expert/explorer/testnet/tx/34b339b1eeae2d656b3eadc014c0ad2c1c17a72f839a44058879cb22f30b5eba) |
+| Filed by (user) | Mentoring member — [`GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4`](https://tessera-beta-five.vercel.app/profile/GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4) |
+| Status | minted · on-chain (token #1) |
+| Credential | token **#1** · [mint tx](https://stellar.expert/explorer/testnet/tx/cc14b76cdb998d856e4831cfc899f34127eba491437779457788b4c42b5fe236) |
 
 ### 👤 Users (members) & their claims
 
 | User identity | Wallet ID | Claim (under org) | Credential |
 | :--- | :--- | :--- | :--- |
-| Mentoring member (HackSpire 2026) | [`GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY`](https://stellar.expert/explorer/testnet/account/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) | “Mentored a first-time hackathon team through Soroban contract deployment…” — HackSpire | [token #4](https://tessera-beta-five.vercel.app/profile/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) |
-| Open-source member (js-soroban-client) | [`GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5`](https://stellar.expert/explorer/testnet/account/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) | “Merged a pull request adding retry-with-backoff handling to the Soroban RPC client…” — GDG Groups | [token #5](https://tessera-beta-five.vercel.app/profile/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) |
-| Speaker member (GDG DevFest Kolkata) | [`GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3`](https://stellar.expert/explorer/testnet/account/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) | “Gave a 10-minute lightning talk on soulbound credentials…” — FIEM ACM | [token #6](https://tessera-beta-five.vercel.app/profile/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) |
+| Mentoring member (HackSpire 2026) | [`GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4`](https://stellar.expert/explorer/testnet/account/GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4) | “Mentored a first-time hackathon team through Soroban contract deployment…” — HackSpire | [token #1](https://tessera-beta-five.vercel.app/profile/GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4) |
+| Open-source member (js-soroban-client) | [`GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D`](https://stellar.expert/explorer/testnet/account/GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D) | “Merged a pull request adding retry-with-backoff handling to the Soroban RPC client…” — GDG Groups | [token #2](https://tessera-beta-five.vercel.app/profile/GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D) |
+| Speaker member (GDG DevFest Kolkata) | [`GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK`](https://stellar.expert/explorer/testnet/account/GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK) | “Gave a 10-minute lightning talk on soulbound credentials…” — FIEM ACM | [token #3](https://tessera-beta-five.vercel.app/profile/GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK) |
 
 > Demo members use role-based identities — on Tessera the wallet address *is* the identity, so no personal names or PII are stored.
 
@@ -448,9 +451,9 @@ Every identity in the demo, the wallet ID it signs with, and what that wallet is
 | FIEM ACM | Organization (issuer) | [`GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK`](https://stellar.expert/explorer/testnet/account/GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK) | Signs FIEM ACM claim mints on-chain |
 | GDG Groups | Organization (issuer) | [`GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV`](https://stellar.expert/explorer/testnet/account/GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV) | Signs GDG Groups claim mints on-chain |
 | HackSpire | Organization (issuer) | [`GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K`](https://stellar.expert/explorer/testnet/account/GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K) | Signs HackSpire claim mints on-chain |
-| Mentoring member | User | `GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY` | Credential #4 holder · [profile](https://tessera-beta-five.vercel.app/profile/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) |
-| Open-source member | User | `GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5` | Credential #5 holder · [profile](https://tessera-beta-five.vercel.app/profile/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) |
-| Speaker member | User | `GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3` | Credential #6 holder · [profile](https://tessera-beta-five.vercel.app/profile/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) |
+| Mentoring member | User | `GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4` | Credential #1 holder · [profile](https://tessera-beta-five.vercel.app/profile/GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4) |
+| Open-source member | User | `GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D` | Credential #2 holder · [profile](https://tessera-beta-five.vercel.app/profile/GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D) |
+| Speaker member | User | `GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK` | Credential #3 holder · [profile](https://tessera-beta-five.vercel.app/profile/GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK) |
 
 Plus browser-side memory: the organizer key persists in `localStorage["tessera.organizerKey"]`, and a member's identity persists as their connected wallet address — no server-side sessions.
 
@@ -525,7 +528,7 @@ Community feedback from pilot hackathons and student chapters is continuously ga
 | **Live Production Demo** | ✅ Pass | [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app) |
 | **Contract Deployment Addresses** | ✅ Pass | Both contract IDs (see [deployment table](#-soroban-smart-contracts--deployment-details-stellar-testnet)) |
 | **Deployer Wallet Address** | ✅ Pass | [`GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS`](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) |
-| **Proof of 10+ Wallet Interactions** | ✅ Pass | **10 verified testnet transactions** — 4 deployment/setup, 3 org-signed mints, 3 sponsored account creations (see [verification log](#-on-chain-verification-log--testnet-2026-08-29--2026-08-30)) + 2 live on-chain state reads |
+| **Proof of 10+ Wallet Interactions** | ✅ Pass | **13 verified testnet transactions** — 7 deployment/setup, 3 org-signed mints, 3 sponsored account creations (see [verification log](#-on-chain-verification-log--testnet-2026-08-31)) + 2 live on-chain state reads |
 | **Analytics & Monitoring Setup** | ✅ Pass | Live on-chain stats via `/api/stats`, real-time profile reads, Horizon account sync |
 | **Basic User Feedback Summary** | ✅ Pass | [Feedback Form](https://forms.gle/nQZzh1WRdAEv4w4P7) & [Responses Spreadsheet](https://docs.google.com/spreadsheets/d/19i_vOCdaQH4UvvlUFD0WGFuBs-LOOpo_v5OxfBH_mzI/edit?gid=656352860#gid=656352860) (see [Feedback section](#-community-feedback)) |
 | **Demo Video Link (1–2 mins)** | ✅ Pass | [https://youtu.be/gB-rpFftlVU](https://youtu.be/gB-rpFftlVU) (see [Demo Video section](#-demo-video)) |
@@ -536,7 +539,7 @@ Community feedback from pilot hackathons and student chapters is continuously ga
 > **Production Deployment Verification**: continuous delivery via Vercel at [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app). All commits pushed to `main`.
 
 - [x] **Soroban Smart Contract Implementation**: two custom Rust Soroban contracts (`contracts/credential-contract`, `contracts/issuer-registry`) enforcing soulbound non-transferability and org-gated issuance.
-- [x] **Stellar Testnet Deployment**: both contracts live on testnet (protocol 28); the new observability version (contract events + issuer enumeration) is pending redeploy.
+- [x] **Stellar Testnet Deployment**: both contracts live on testnet (protocol 28) — the v2 deployment (2026-08-31) with contract events + issuer enumeration; WASM hashes verified byte-identical to the repo build.
 - [x] **Automated Smart Contract Tests**: 21/21 passing Rust tests covering authorization, revocation, the soulbound invariant, events, and per-issuer enumeration.
 - [x] **Full-Stack SaaS Web App**: single Next.js 16 deployable — marketing landing, organizer dashboard, wallet onboarding, public 3D credential wall.
 - [x] **Stellar Wallet & Freighter Integration**: stellar-wallet-kit wallet connect + sponsored zero-XLM account onboarding.
@@ -733,7 +736,7 @@ Tessera is a single Next.js 16 repository that deploys directly to Vercel — cu
 
 Notes:
 
-- The claims store is a local JSON file; on Vercel it is **ephemeral** (new claims reset between deploys/scale events). The three **demo credentials are auto-hydrated on every deploy** — `lib/demo-claims.ts` re-seeds the store with the real on-chain records (tokens #4–#6) whenever they're missing, so the organizer dashboard always shows the live demo with no manual step. Contract state, IPFS metadata, and profile pages are durable. For a fully persistent multi-instance deploy, swap `lib/store.ts` for a KV/Postgres backend.
+- The claims store is a local JSON file; on Vercel it is **ephemeral** (new claims reset between deploys/scale events). The three **demo credentials are auto-hydrated on every deploy** — `lib/demo-claims.ts` re-seeds the store with the real on-chain records (tokens #1–#3) whenever they're missing, so the organizer dashboard always shows the live demo with no manual step. Contract state, IPFS metadata, and profile pages are durable. For a fully persistent multi-instance deploy, swap `lib/store.ts` for a KV/Postgres backend.
 - If the contracts are redeployed, update the contract-ID env vars in the Vercel project.
 
 ---
