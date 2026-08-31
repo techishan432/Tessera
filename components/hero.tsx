@@ -86,7 +86,7 @@ export function Hero({ demoWallet }: { demoWallet: string }) {
           className="mt-8 flex flex-wrap items-center gap-2.5"
         >
           {[
-            ["3 pilot orgs", "FIEM ACM · GDG Groups · HackSpire"],
+            ["5 pilot orgs", "FIEM ACM · GDG Groups · GDG Kolkata · GDG Bengaluru · HackSpire"],
             ["Soulbound", "non-transferable by contract"],
             ["Micro fees", "0.00001 XLM · sub-second finality"],
           ].map(([label, sub]) => (

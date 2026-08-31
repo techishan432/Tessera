@@ -10,7 +10,7 @@ Tessera mints **non-transferable (soulbound) credentials** on Stellar's **Soroba
 📹 **Live Demo Video**: [https://youtu.be/gB-rpFftlVU](https://youtu.be/gB-rpFftlVU)
 📁 **Public GitHub Repo**: [https://github.com/techishan432/Tessera](https://github.com/techishan432/Tessera)
 
-**Pilot communities:** FIEM ACM · GDG Groups · HackSpire
+**Pilot communities:** FIEM ACM · GDG Groups · GDG Kolkata · GDG Bengaluru · HackSpire
 
 > A *tessera* is a mosaic tile — and, in Rome, the citizen's identity token.
 >
@@ -74,7 +74,9 @@ flowchart TB
     subgraph Orgs["Pilot organizations (testnet issuer keys)"]
         O1["FIEM ACM"]
         O2["GDG Groups"]
-        O3["HackSpire"]
+        O3["GDG Kolkata"]
+        O4["GDG Bengaluru"]
+        O5["HackSpire"]
     end
 
     E["🔎 Anyone / verifier<br/>(bio link, explorer)"]
@@ -86,7 +88,9 @@ flowchart TB
     APP -->|"org key signs mint(issuer, to, cid)"| O1
     APP -->|"org key signs mint(issuer, to, cid)"| O2
     APP -->|"org key signs mint(issuer, to, cid)"| O3
-    O1 & O2 & O3 -.->|"each registered in issuer-registry"| CHAIN["Soroban testnet<br/>credential-contract + issuer-registry"]
+    APP -->|"org key signs mint(issuer, to, cid)"| O4
+    APP -->|"org key signs mint(issuer, to, cid)"| O5
+    O1 & O2 & O3 & O4 & O5 -.->|"each registered in issuer-registry"| CHAIN["Soroban testnet<br/>credential-contract + issuer-registry"]
     WAL <-->|"credential stored against holder"| CHAIN
     E -->|"reads the 3D credential wall"| PF["Public profile<br/>/profile/[wallet]"]
     CHAIN -->|"get_credentials(holder)"| PF
@@ -264,18 +268,20 @@ Every transaction below was re-verified against Horizon, the Soroban RPC, and th
 | **5** | registry `add_issuer` — FIEM ACM | ✅ | [`9718088295953f8e663eb1b7df0d21f77edd13d4d00c673e44e8b1df5f17aca6`](https://stellar.expert/explorer/testnet/tx/9718088295953f8e663eb1b7df0d21f77edd13d4d00c673e44e8b1df5f17aca6) | 4433114 |
 | **6** | registry `add_issuer` — GDG Groups | ✅ | [`74708afd80b184e9b118e7c4b717576453a908220d28e84c62570aa65bfa3f22`](https://stellar.expert/explorer/testnet/tx/74708afd80b184e9b118e7c4b717576453a908220d28e84c62570aa65bfa3f22) | 4433116 |
 | **7** | registry `add_issuer` — HackSpire | ✅ | [`3dfa617311f02bddf3342f7d1467987a4453ef9345df54abb7d0607f7f475674`](https://stellar.expert/explorer/testnet/tx/3dfa617311f02bddf3342f7d1467987a4453ef9345df54abb7d0607f7f475674) | 4433117 |
-| **8** | Live read: `token_count()` / `get_issuers()` | ✅ returned `3` / the 3 pilot orgs | — | — |
-| **9** | `mint` token #1 — HackSpire · mentoring (claimant `GC6W…T4`) | ✅ fee ≈ 0.00004 XLM | [`cc14b76cdb998d856e4831cfc899f34127eba491437779457788b4c42b5fe236`](https://stellar.expert/explorer/testnet/tx/cc14b76cdb998d856e4831cfc899f34127eba491437779457788b4c42b5fe236) | 4433154 |
-| **10** | `mint` token #2 — GDG Groups · open-source PR (claimant `GC4N…2D`) | ✅ | [`e13be1f720b1453d3fb22ec206d9267182ed97a3ab244ea4405a393de0c70b00`](https://stellar.expert/explorer/testnet/tx/e13be1f720b1453d3fb22ec206d9267182ed97a3ab244ea4405a393de0c70b00) | 4433156 |
-| **11** | `mint` token #3 — FIEM ACM · talk (claimant `GAUR…SK`) | ✅ | [`4309edbf8512523fa2949a3f8df9a1c68bb5c94b1a96cb02a87b49f81a3a7b8b`](https://stellar.expert/explorer/testnet/tx/4309edbf8512523fa2949a3f8df9a1c68bb5c94b1a96cb02a87b49f81a3a7b8b) | 4433158 |
-| **12** | `transfer` attempt on token #1 (soulbound check, run by `npm run seed`) | ❌ rejected on-chain — **as designed** | — (failed tx) | — |
-| **13** | v2 observability check — contract events | ✅ 3 `mint` events (credential) + 3 `add_issuer` events (registry) visible in Stellar Expert | — | — |
+| **8** | registry `add_issuer` — GDG Kolkata | ✅ | [`d17a800d763fa3f41590f06ab845b452de53cb5e446a36f1b231f4d3f0843c33`](https://stellar.expert/explorer/testnet/tx/d17a800d763fa3f41590f06ab845b452de53cb5e446a36f1b231f4d3f0843c33) | 4434474 |
+| **9** | registry `add_issuer` — GDG Bengaluru | ✅ | [`d30cbc04fdc02165d70960668b5475a1eec40dd6868f3336fd9969ae6522205c`](https://stellar.expert/explorer/testnet/tx/d30cbc04fdc02165d70960668b5475a1eec40dd6868f3336fd9969ae6522205c) | 4434475 |
+| **10** | Live read: `token_count()` / `get_issuers()` | ✅ returned `3` / the 5 pilot orgs | — | — |
+| **11** | `mint` token #1 — HackSpire · mentoring (claimant `GC6W…T4`) | ✅ fee ≈ 0.00004 XLM | [`cc14b76cdb998d856e4831cfc899f34127eba491437779457788b4c42b5fe236`](https://stellar.expert/explorer/testnet/tx/cc14b76cdb998d856e4831cfc899f34127eba491437779457788b4c42b5fe236) | 4433154 |
+| **12** | `mint` token #2 — GDG Groups · open-source PR (claimant `GC4N…2D`) | ✅ | [`e13be1f720b1453d3fb22ec206d9267182ed97a3ab244ea4405a393de0c70b00`](https://stellar.expert/explorer/testnet/tx/e13be1f720b1453d3fb22ec206d9267182ed97a3ab244ea4405a393de0c70b00) | 4433156 |
+| **13** | `mint` token #3 — FIEM ACM · talk (claimant `GAUR…SK`) | ✅ | [`4309edbf8512523fa2949a3f8df9a1c68bb5c94b1a96cb02a87b49f81a3a7b8b`](https://stellar.expert/explorer/testnet/tx/4309edbf8512523fa2949a3f8df9a1c68bb5c94b1a96cb02a87b49f81a3a7b8b) | 4433158 |
+| **14** | `transfer` attempt on token #1 (soulbound check, run by `npm run seed`) | ❌ rejected on-chain — **as designed** | — (failed tx) | — |
+| **15** | v2 observability check — contract events | ✅ 3 `mint` events (credential) + 5 `add_issuer` events (registry) visible in Stellar Expert | — | — |
 
 Notes:
 
-- Rows 9–11 were each signed by the respective **pilot org's own issuer key** (not the operator) — the orgs mint their own credentials; the registry is what makes it possible.
-- The mints succeed only because rows 2–7's setup (registry `initialize`, three `add_issuer` calls, credential `initialize`) already completed — the registry gate and the registry pointer are preconditions enforced inside `mint`.
-- Live state reads (row 8) were performed on 2026-08-31 via read-only RPC simulation.
+- Rows 11–13 were each signed by the respective **pilot org's own issuer key** (not the operator) — the orgs mint their own credentials; the registry is what makes it possible.
+- The mints succeed only because rows 2–9's setup (registry `initialize`, five `add_issuer` calls, credential `initialize`) already completed — the registry gate and the registry pointer are preconditions enforced inside `mint`.
+- Live state reads (row 10) were performed on 2026-08-31 via read-only RPC simulation.
 - The previous deployment (2026-08-29: credential `CBU3…F64`, registry `CD2M…K7AH`) is **superseded** by this v2 deployment and no longer referenced by the application; its three demo credentials (tokens #4–#6) remain on-chain at their original addresses for the record.
 
 ---
@@ -431,6 +437,18 @@ From then on, `claimantWallet` on every claim is the member's G-address, and the
 | Status | minted · on-chain (token #1) |
 | Credential | token **#1** · [mint tx](https://stellar.expert/explorer/testnet/tx/cc14b76cdb998d856e4831cfc899f34127eba491437779457788b4c42b5fe236) |
 
+**GDG Kolkata** — issuer wallet [`GDXYMHZKXFLBWARS7F56OKQJYMGJ3OMHMDJ72C64DAH5S6RAAHQW4P23`](https://stellar.expert/explorer/testnet/account/GDXYMHZKXFLBWARS7F56OKQJYMGJ3OMHMDJ72C64DAH5S6RAAHQW4P23)
+
+| Claim | Detail |
+| :--- | :--- |
+| Status | no claims yet — registered and ready to issue |
+
+**GDG Bengaluru** — issuer wallet [`GCZ5OXBGCBMSH7DHJMMZWQF4TIE2JFXPBFTGGOYN6B4QH5QHAMBRDR2N`](https://stellar.expert/explorer/testnet/account/GCZ5OXBGCBMSH7DHJMMZWQF4TIE2JFXPBFTGGOYN6B4QH5QHAMBRDR2N)
+
+| Claim | Detail |
+| :--- | :--- |
+| Status | no claims yet — registered and ready to issue |
+
 ### 👤 Users (members) & their claims
 
 | User identity | Wallet ID | Claim (under org) | Credential |
@@ -451,6 +469,8 @@ Every identity in the demo, the wallet ID it signs with, and what that wallet is
 | FIEM ACM | Organization (issuer) | [`GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK`](https://stellar.expert/explorer/testnet/account/GBTNM6N7NJ2WZV46C3HWA7EC6LBKZMHY7KSWTNV34OMM5CA47TS4Q6KK) | Signs FIEM ACM claim mints on-chain |
 | GDG Groups | Organization (issuer) | [`GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV`](https://stellar.expert/explorer/testnet/account/GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV) | Signs GDG Groups claim mints on-chain |
 | HackSpire | Organization (issuer) | [`GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K`](https://stellar.expert/explorer/testnet/account/GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K) | Signs HackSpire claim mints on-chain |
+| GDG Kolkata | Organization (issuer) | [`GDXYMHZKXFLBWARS7F56OKQJYMGJ3OMHMDJ72C64DAH5S6RAAHQW4P23`](https://stellar.expert/explorer/testnet/account/GDXYMHZKXFLBWARS7F56OKQJYMGJ3OMHMDJ72C64DAH5S6RAAHQW4P23) | Signs GDG Kolkata claim mints on-chain |
+| GDG Bengaluru | Organization (issuer) | [`GCZ5OXBGCBMSH7DHJMMZWQF4TIE2JFXPBFTGGOYN6B4QH5QHAMBRDR2N`](https://stellar.expert/explorer/testnet/account/GCZ5OXBGCBMSH7DHJMMZWQF4TIE2JFXPBFTGGOYN6B4QH5QHAMBRDR2N) | Signs GDG Bengaluru claim mints on-chain |
 | Mentoring member | User | `GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4` | Credential #1 holder · [profile](https://tessera-beta-five.vercel.app/profile/GC6WLOXCCWZHE34FA5NBS45CHYRXJA7FMKE47Y52JWPH46QJP6LY2HT4) |
 | Open-source member | User | `GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D` | Credential #2 holder · [profile](https://tessera-beta-five.vercel.app/profile/GC4NMHEYOMPDIFDLQZJ3O36XPQAKRN3O4FHLK2PV6DAP6IAWEUXL5P2D) |
 | Speaker member | User | `GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK` | Credential #3 holder · [profile](https://tessera-beta-five.vercel.app/profile/GAURX4VRXXCX6Y6A6PSR5M342CR5LKU7RZP4FFSWWXDPRK22LXCJEQSK) |
@@ -528,7 +548,7 @@ Community feedback from pilot hackathons and student chapters is continuously ga
 | **Live Production Demo** | ✅ Pass | [https://tessera-beta-five.vercel.app](https://tessera-beta-five.vercel.app) |
 | **Contract Deployment Addresses** | ✅ Pass | Both contract IDs (see [deployment table](#-soroban-smart-contracts--deployment-details-stellar-testnet)) |
 | **Deployer Wallet Address** | ✅ Pass | [`GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS`](https://stellar.expert/explorer/testnet/account/GDQZIUOFLL5OPCYTDJE4YO766AJQYZ3XQQIZ6BO27ADKEE24GMX72LYS) |
-| **Proof of 10+ Wallet Interactions** | ✅ Pass | **13 verified testnet transactions** — 7 deployment/setup, 3 org-signed mints, 3 sponsored account creations (see [verification log](#-on-chain-verification-log--testnet-2026-08-31)) + 2 live on-chain state reads |
+| **Proof of 10+ Wallet Interactions** | ✅ Pass | **15 verified testnet transactions** — 9 deployment/setup, 3 org-signed mints, 3 sponsored account creations (see [verification log](#-on-chain-verification-log--testnet-2026-08-31)) + 2 live on-chain state reads |
 | **Analytics & Monitoring Setup** | ✅ Pass | Live on-chain stats via `/api/stats`, real-time profile reads, Horizon account sync |
 | **Basic User Feedback Summary** | ✅ Pass | [Feedback Form](https://forms.gle/nQZzh1WRdAEv4w4P7) & [Responses Spreadsheet](https://docs.google.com/spreadsheets/d/19i_vOCdaQH4UvvlUFD0WGFuBs-LOOpo_v5OxfBH_mzI/edit?gid=656352860#gid=656352860) (see [Feedback section](#-community-feedback)) |
 | **Demo Video Link (1–2 mins)** | ✅ Pass | [https://youtu.be/gB-rpFftlVU](https://youtu.be/gB-rpFftlVU) (see [Demo Video section](#-demo-video)) |
@@ -670,7 +690,7 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser!
 npm run seed
 ```
 
-The seed script runs the **full pipeline end-to-end on testnet** — sponsored account → claim → AI verify → organizer approval → on-chain mint — for three demo contributions (mentoring / PR / talk) across the three pilot orgs, then **attempts a transfer to prove the soulbound invariant reverts**. It is idempotent on re-run.
+The seed script first **ensures the full org roster is registered in the on-chain issuer registry** (idempotent — already-registered orgs are skipped), then runs the **full pipeline end-to-end on testnet** — sponsored account → claim → AI verify → organizer approval → on-chain mint — for three demo contributions (mentoring / PR / talk) across the five pilot orgs, and finally **attempts a transfer to prove the soulbound invariant reverts**. It is idempotent on re-run.
 
 ---
 
