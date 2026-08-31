@@ -15,21 +15,26 @@ export function ClaimCard({
   busy,
   onAction,
   justApproved,
+  canAct,
 }: {
   claim: StoredClaimLocal;
   busy: boolean;
   onAction: (id: string, action: ClaimAction) => void;
   justApproved: boolean;
+  /** Organizer signed in — approve/reject/mint are gated on this. */
+  canAct: boolean;
 }) {
   const shortWallet =
     claim.claimantWallet.slice(0, 6) + "…" + claim.claimantWallet.slice(-4);
   const v = claim.verification;
 
+  const isMutating = (a: ClaimAction) => a !== "verify";
   const actions: { action: ClaimAction; label: string; show: boolean; variant?: "primary" | "gold" | "outline" }[] = [
     { action: "verify", label: "Run AI verify", show: claim.status === "pending", variant: "primary" },
     { action: "approve", label: "Approve", show: claim.status === "pending" || claim.status === "verified", variant: "gold" },
     { action: "reject", label: "Reject", show: claim.status === "pending" || claim.status === "verified", variant: "outline" },
     { action: "mint", label: "Mint credential", show: claim.status === "approved", variant: "primary" },
+    { action: "mint", label: "Retry mint", show: claim.status === "failed", variant: "gold" },
   ];
 
   return (
@@ -108,35 +113,55 @@ export function ClaimCard({
           {claim.error}
         </p>
       )}
+
       {claim.status === "minted" && claim.credential && (
-        <p className="mt-3 font-mono text-[11px] text-muted">
-          token #{claim.credential.tokenId} · {claim.credential.cid}
+        <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-muted">
+          <span>
+            token #{claim.credential.tokenId} · {claim.credential.cid}
+          </span>
+          <a
+            href={`https://stellar.expert/explorer/testnet/tx/${claim.credential.txHash}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            view tx on Stellar Expert ↗
+          </a>
         </p>
       )}
 
-      {/* hover-reveal actions */}
-      <div className="mt-4 flex flex-wrap gap-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
+      {/* actions */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         {actions
           .filter((a) => a.show)
-          .map((a) => (
-            <Button
-              key={a.action}
-              size="sm"
-              variant={a.variant ?? "outline"}
-              disabled={busy}
-              onClick={() => onAction(claim.id, a.action)}
-            >
-              {a.label}
-              {busy && (
-                <motion.span
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-                  className="inline-block h-3 w-3 rounded-full border border-current border-t-transparent"
-                  aria-label="working"
-                />
-              )}
-            </Button>
-          ))}
+          .map((a) => {
+            const gated = isMutating(a.action) && !canAct;
+            return (
+              <Button
+                key={a.action + a.label}
+                size="sm"
+                variant={a.variant ?? "outline"}
+                disabled={busy || gated}
+                title={gated ? "Sign in as organizer to act on claims" : undefined}
+                onClick={() => onAction(claim.id, a.action)}
+              >
+                {a.label}
+                {busy && (
+                  <motion.span
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                    className="inline-block h-3 w-3 rounded-full border border-current border-t-transparent"
+                    aria-label="working"
+                  />
+                )}
+              </Button>
+            );
+          })}
+        {!canAct && actions.some((a) => a.show && isMutating(a.action)) && (
+          <span className="text-[11px] text-muted">
+            sign in as organizer (above) to approve, reject, or mint
+          </span>
+        )}
       </div>
     </motion.li>
   );
