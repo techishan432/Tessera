@@ -392,42 +392,42 @@ From then on, `claimantWallet` on every claim is the member's G-address, and the
 
 | Claim | Detail |
 | :--- | :--- |
-| Description | Delivered “Intro to Stellar” talk at FIEM ACM meetup |
-| Type · Event · Date | `talk` · FIEM ACM Monthly Meetup · 2026-01-25 |
-| Evidence | [Meetup event page](https://www.meetup.com/fiemacm/events/) |
+| Description | Gave a 10-minute lightning talk on soulbound credentials and portable community contribution history on Stellar |
+| Type · Event · Date | `talk` · GDG DevFest Kolkata · 2026-04-11 |
+| Evidence | [GDG community (event host)](https://gdg.community.dev/) |
 | Filed by (user) | Speaker member — [`GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3`](https://tessera-beta-five.vercel.app/profile/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) |
-| AI verdict | approved · confidence 0.80 · qwen3-32b |
+| Status | minted · on-chain (token #6) |
 | Credential | token **#6** · [mint tx](https://stellar.expert/explorer/testnet/tx/eb00382c0c76d6f5cda088a9cc450958b1fe21bf2745b8889b20950c2f2d43f0) |
 
 **GDG Groups** — issuer wallet [`GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV`](https://stellar.expert/explorer/testnet/account/GBIFFT5LP62MKUJGWQYPVSKI3TGIEHNQ5RMZQFCWMKHDHQVYURPMMNQV)
 
 | Claim | Detail |
 | :--- | :--- |
-| Description | Merged 12 PRs into GDG developer portal |
-| Type · Event · Date | `pr` · GDG Open Source Program · 2026-03-05 |
-| Evidence | [GitHub PR list](https://github.com/gdg-dev/portal/pulls?q=is%3Apr+author%3Ademo-dev+is%3Aclosed) |
+| Description | Merged a pull request adding retry-with-backoff handling to the Soroban RPC client's transaction submission path |
+| Type · Event · Date | `pr` · js-soroban-client · 2026-05-14 |
+| Evidence | [Repository of the merged PR](https://github.com/stellar/js-soroban-client) |
 | Filed by (user) | Open-source member — [`GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5`](https://tessera-beta-five.vercel.app/profile/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) |
-| AI verdict | approved · confidence 0.90 · qwen3-32b |
+| Status | minted · on-chain (token #5) |
 | Credential | token **#5** · [mint tx](https://stellar.expert/explorer/testnet/tx/d139e6a61596911260464d06ca5679ec8bbec7a3bce8c375a23abfd14e9d93b7) |
 
 **HackSpire** — issuer wallet [`GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K`](https://stellar.expert/explorer/testnet/account/GBLACQHYGATZLOISJ3EJI6K6W5LZX3PIGZZTDEB56S6ONOTCZPPJLZ4K)
 
 | Claim | Detail |
 | :--- | :--- |
-| Description | Mentored 4 teams at HackSpire Bootcamp 2026 |
-| Type · Event · Date | `mentoring` · HackSpire Bootcamp · 2026-06-18 |
-| Evidence | [HackSpire mentor board](https://www.hackspire.io/mentors) |
+| Description | Mentored a first-time hackathon team through Soroban contract deployment, covering auth entries and testnet RPC |
+| Type · Event · Date | `mentoring` · HackSpire 2026 · 2026-03-21 |
+| Evidence | [Soroban examples used in the mentoring session](https://github.com/stellar/soroban-examples) |
 | Filed by (user) | Mentoring member — [`GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY`](https://tessera-beta-five.vercel.app/profile/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) |
-| AI verdict | approved · confidence 0.85 · qwen3-32b |
+| Status | minted · on-chain (token #4) |
 | Credential | token **#4** · [mint tx](https://stellar.expert/explorer/testnet/tx/34b339b1eeae2d656b3eadc014c0ad2c1c17a72f839a44058879cb22f30b5eba) |
 
 ### 👤 Users (members) & their claims
 
 | User identity | Wallet ID | Claim (under org) | Credential |
 | :--- | :--- | :--- | :--- |
-| Mentoring member (HackSpire bootcamp) | [`GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY`](https://stellar.expert/explorer/testnet/account/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) | “Mentored 4 teams at HackSpire Bootcamp 2026” — HackSpire | [token #4](https://tessera-beta-five.vercel.app/profile/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) |
-| Open-source member (GDG portal) | [`GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5`](https://stellar.expert/explorer/testnet/account/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) | “Merged 12 PRs into GDG developer portal” — GDG Groups | [token #5](https://tessera-beta-five.vercel.app/profile/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) |
-| Speaker member (FIEM meetup) | [`GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3`](https://stellar.expert/explorer/testnet/account/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) | “Delivered ‘Intro to Stellar’ talk at FIEM ACM meetup” — FIEM ACM | [token #6](https://tessera-beta-five.vercel.app/profile/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) |
+| Mentoring member (HackSpire 2026) | [`GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY`](https://stellar.expert/explorer/testnet/account/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) | “Mentored a first-time hackathon team through Soroban contract deployment…” — HackSpire | [token #4](https://tessera-beta-five.vercel.app/profile/GBR2PJQPVU2MNNWNTABFDSLG7XQAWAZRSSMRXWRPQKNAMVBD7VOCRCKY) |
+| Open-source member (js-soroban-client) | [`GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5`](https://stellar.expert/explorer/testnet/account/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) | “Merged a pull request adding retry-with-backoff handling to the Soroban RPC client…” — GDG Groups | [token #5](https://tessera-beta-five.vercel.app/profile/GB4BCHR7PFFHZ7QHW2MPIAMEROXTMKKW2D7Z7AFQP6GDM3RI36QDDST5) |
+| Speaker member (GDG DevFest Kolkata) | [`GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3`](https://stellar.expert/explorer/testnet/account/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) | “Gave a 10-minute lightning talk on soulbound credentials…” — FIEM ACM | [token #6](https://tessera-beta-five.vercel.app/profile/GCNEERET6QU7K654J4AAJ57KCWVSL77UCU3IMPONATAMKPJQ2QNTWIT3) |
 
 > Demo members use role-based identities — on Tessera the wallet address *is* the identity, so no personal names or PII are stored.
 
@@ -726,7 +726,7 @@ Tessera is a single Next.js 16 repository that deploys directly to Vercel — cu
 
 Notes:
 
-- The claims store is a local JSON file; on Vercel it is **ephemeral** (claims reset between deploys/scale events). Contract state, IPFS metadata, and profile pages are durable — a redeploy + `npm run seed` restores the demo end-to-end. For a persistent multi-instance deploy, swap `lib/store.ts` for a KV/Postgres backend.
+- The claims store is a local JSON file; on Vercel it is **ephemeral** (new claims reset between deploys/scale events). The three **demo credentials are auto-hydrated on every deploy** — `lib/demo-claims.ts` re-seeds the store with the real on-chain records (tokens #4–#6) whenever they're missing, so the organizer dashboard always shows the live demo with no manual step. Contract state, IPFS metadata, and profile pages are durable. For a fully persistent multi-instance deploy, swap `lib/store.ts` for a KV/Postgres backend.
 - If the contracts are redeployed, update the contract-ID env vars in the Vercel project.
 
 ---
